@@ -2,7 +2,9 @@
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <regex>
 #include <string>
+#include <sstream>
 
 Font::Font(const ResourceLocation &location) {
   // Load the font provider from the resource location
@@ -20,15 +22,26 @@ void Font::loadFont(const ResourceLocation &location) {
     return;
   }
 
+  // Read the entire file content
+  std::stringstream buffer;
+  buffer << fontFile.rdbuf();
+  std::string jsonContent = buffer.str();
+  fontFile.close();
+  
+  // Remove trailing commas from arrays and objects
+  // This regex looks for a comma followed by optional whitespace and then ] or }
+  std::regex trailingCommaRegex(",\\s*([\\]\\}])");
+  std::string cleanedJson = std::regex_replace(jsonContent, trailingCommaRegex, "$1");
+
   nlohmann::json fontData;
 
   try {
-    fontFile >> fontData;
+    // Parse the cleaned JSON content
+    fontData = nlohmann::json::parse(cleanedJson);
   } catch (const nlohmann::json::parse_error &e) {
     std::cerr << "Failed to parse font file: " << e.what() << std::endl;
     return;
   }
-  fontFile.close();
 
   // Parse the font data
   if (fontData.contains("providers")) {
