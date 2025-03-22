@@ -4,11 +4,13 @@
 #include <stdio.h>
 #include <vector>
 
-TextureManager::TextureManager() {
-  std::cout << "TextureManager initialized" << std::endl;
-}
+std::unordered_map<std::string, GLuint> TextureManager::textureCache;
 
-TextureManager::~TextureManager() { clearTextures(); }
+// TextureManager::TextureManager() {
+//   std::cout << "TextureManager initialized" << std::endl;
+// }
+
+// TextureManager::~TextureManager() { clearTextures(); }
 
 GLuint TextureManager::loadTexture(const ResourceLocation &location) {
   std::string texturePath = "umd0:/assets/" + location.getNamespace() +
@@ -158,7 +160,7 @@ GLuint TextureManager::getTexture(const std::string &texturePath) {
   return 0;
 }
 
-bool TextureManager::isTextureLoaded(const std::string &texturePath) const {
+bool TextureManager::isTextureLoaded(const std::string &texturePath) {
   return textureCache.find(texturePath) != textureCache.end();
 }
 

@@ -71,8 +71,6 @@ float cameraZ = -8.0f;    // Start further back to see more of the scene
 float cameraRotX = 15.0f; // Start with a slight downward tilt
 float cameraRotY = 0.0f;
 
-// Texture manager
-TextureManager textureManager;
 
 // Custom function for perspective projection since GLES 1.0 doesn't include
 // gluPerspective
@@ -262,8 +260,6 @@ int initGL() {
   // Enable texturing
   glEnable(GL_TEXTURE_2D);
 
-  // Set the texture manager for the Model class
-  Model::setTextureManager(&textureManager);
 
   return 0;
 }
@@ -552,7 +548,7 @@ int main(int argc, char *argv[]) {
   }
 
   // Clean up resources
-  textureManager.clearTextures();
+  TextureManager::clearTextures();
 
   // Terminate EGL
   eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);

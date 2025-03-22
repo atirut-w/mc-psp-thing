@@ -5,8 +5,6 @@
 #include <nlohmann/json.hpp>
 #include <stack>
 
-// Initialize static texture manager pointer
-TextureManager* Model::textureManager = nullptr;
 
 // Constructor loads the model from the given ResourceLocation
 Model::Model(const ResourceLocation& location) {
@@ -434,15 +432,15 @@ void Model::renderFace(const std::string& faceName, const ModelFace& face,
     // Find the texture ID from the texture manager
     GLuint textureID = 0;
     
-    if (textureManager && !textureRef.empty()) {
+    if (!textureRef.empty()) {
         // Texture might be a direct ResourceLocation or a string path
         // Try to load it directly
-        textureID = textureManager->getTexture(textureRef);
+        textureID = TextureManager::getTexture(textureRef);
         
         // If not successful, try to load as ResourceLocation
         if (textureID == 0) {
             ResourceLocation textureLoc(textureRef);
-            textureID = textureManager->loadTexture(textureLoc);
+            textureID = TextureManager::loadTexture(textureLoc);
         }
     }
     

@@ -51,7 +51,6 @@ class TextureManager;
 
 class Model {
 private:
-    static TextureManager* textureManager;
     
     std::string parent;
     bool ambientocclusion = true;
@@ -98,8 +97,4 @@ public:
     // Render the model
     void render() const;
     
-    // Set the texture manager for all models
-    static void setTextureManager(TextureManager* manager) {
-        textureManager = manager;
-    }
 };
