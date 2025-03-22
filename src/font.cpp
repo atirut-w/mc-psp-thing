@@ -1,8 +1,8 @@
 #include <font.hpp>
-#include <string>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <nlohmann/json.hpp>
+#include <string>
 
 Font::Font(const ResourceLocation &location) {
   // Load the font provider from the resource location
@@ -10,7 +10,8 @@ Font::Font(const ResourceLocation &location) {
 }
 
 void Font::loadFont(const ResourceLocation &location) {
-  std::string fontPath = "umd0:/assets/" + location.getFilePath("font") + ".json";
+  std::string fontPath =
+      "umd0:/assets/" + location.getFilePath("font") + ".json";
   std::cout << "Loading font from: " << fontPath << std::endl;
 
   std::ifstream fontFile(fontPath);
@@ -39,19 +40,23 @@ void Font::loadFont(const ResourceLocation &location) {
       } else if (type == "bitmap") {
         // Handle bitmap type
         BitmapFontProvider bitmapProvider;
-        bitmapProvider.file = ResourceLocation(provider["file"].get<std::string>());
+        bitmapProvider.file =
+            ResourceLocation(provider["file"].get<std::string>());
         bitmapProvider.ascent = provider["ascent"];
-        bitmapProvider.chars = provider["chars"].get<std::vector<std::string>>();
+        bitmapProvider.chars =
+            provider["chars"].get<std::vector<std::string>>();
         if (provider.contains("height")) {
           bitmapProvider.height = provider["height"];
         } else {
           bitmapProvider.height = 8; // Default height
         }
-        providers.push_back(std::make_unique<BitmapFontProvider>(bitmapProvider));
+        providers.push_back(
+            std::make_unique<BitmapFontProvider>(bitmapProvider));
       } else if (type == "space") {
         // Handle space type
         SpaceFontProvider spaceProvider;
-        spaceProvider.advances = provider["advances"].get<std::unordered_map<std::string, int>>();
+        spaceProvider.advances =
+            provider["advances"].get<std::unordered_map<std::string, int>>();
         providers.push_back(std::make_unique<SpaceFontProvider>(spaceProvider));
       } else {
         std::cerr << "Unknown font provider type: " << type << std::endl;
@@ -59,7 +64,7 @@ void Font::loadFont(const ResourceLocation &location) {
 
       // Apply filter settings to the most recently added provider
       if (provider.contains("filter") && !providers.empty()) {
-        FontProvider* currentProvider = providers.back().get();
+        FontProvider *currentProvider = providers.back().get();
         if (provider["filter"].contains("uniform")) {
           currentProvider->filter.uniform = provider["filter"]["uniform"];
         }
