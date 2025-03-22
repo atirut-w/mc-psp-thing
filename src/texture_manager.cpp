@@ -6,15 +6,9 @@
 
 std::unordered_map<std::string, GLuint> TextureManager::textureCache;
 
-// TextureManager::TextureManager() {
-//   std::cout << "TextureManager initialized" << std::endl;
-// }
-
-// TextureManager::~TextureManager() { clearTextures(); }
-
 GLuint TextureManager::loadTexture(const ResourceLocation &location) {
-  std::string texturePath = "umd0:/assets/" + location.getNamespace() +
-                            "/textures/" + location.getPath() + ".png";
+  std::string texturePath =
+      "umd0:/assets/" + location.getFilePath("textures") + ".png";
 
   // Check if texture is already loaded
   if (isTextureLoaded(texturePath)) {
@@ -139,8 +133,10 @@ GLuint TextureManager::loadTexture(const ResourceLocation &location) {
 }
 
 GLuint TextureManager::getTexture(const ResourceLocation &location) {
-  std::string texturePath = "umd0:/assets/" + location.getNamespace() +
-                            "/textures/" + location.getPath() + ".png";
+  // std::string texturePath = "umd0:/assets/" + location.getNamespace() +
+  //                           "/textures/" + location.getPath() + ".png";
+  std::string texturePath =
+      "umd0:/assets/" + location.getFilePath("textures") + ".png";
   return getTexture(texturePath);
 }
 
@@ -152,7 +148,8 @@ GLuint TextureManager::getTexture(const std::string &texturePath) {
 
   // If not a full path (doesn't start with umd0:), try as a ResourceLocation
   if (texturePath.find("umd0:") == std::string::npos) {
-    // ResourceLocation constructor will handle default "minecraft" namespace if needed
+    // ResourceLocation constructor will handle default "minecraft" namespace if
+    // needed
     return loadTexture(ResourceLocation(texturePath));
   }
 

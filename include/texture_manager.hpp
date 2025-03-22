@@ -9,9 +9,6 @@ private:
     static std::unordered_map<std::string, GLuint> textureCache;
     
 public:
-    // TextureManager();
-    // ~TextureManager();
-    
     // Load a texture from a resource location and return its GL texture ID
     static GLuint loadTexture(const ResourceLocation& location);
     

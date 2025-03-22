@@ -33,6 +33,6 @@ public:
   }
 
   std::string getFilePath(const std::string& baseDir) const {
-    return baseDir + "/" + ns + "/" + path;
+    return ns + "/" + baseDir + "/" + path;
   }
 };

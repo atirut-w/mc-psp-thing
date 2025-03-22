@@ -13,7 +13,7 @@ Model::Model(const ResourceLocation& location) {
 
 // Load model from a file
 void Model::loadModel(const ResourceLocation& location) {
-    std::string modelPath = "umd0:/assets/" + location.getNamespace() + "/models/" + location.getPath() + ".json";
+    std::string modelPath = "umd0:/assets/" + location.getFilePath("models") + ".json";
     std::cout << "Loading model from: " << modelPath << std::endl;
 
     std::ifstream modelFile(modelPath);
@@ -76,7 +76,7 @@ void Model::loadParentModel(const std::string& parentPath) {
 
     // Normal parent model
     ResourceLocation parentLocation(parentPath);
-    std::string modelPath = "umd0:/assets/" + parentLocation.getNamespace() + "/models/" + parentLocation.getPath() + ".json";
+    std::string modelPath = "umd0:/assets/" + parentLocation.getFilePath("models") + ".json";
     std::cout << "Loading parent model from: " << modelPath << std::endl;
 
     std::ifstream modelFile(modelPath);
