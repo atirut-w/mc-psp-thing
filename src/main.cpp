@@ -1,6 +1,7 @@
 #include "model.hpp"
 #include "texture_manager.hpp"
 #include "renderer.hpp"
+#include "font.hpp"
 #include <GLES/egl.h>
 #include <GLES/gl.h>
 #include <iostream>
@@ -61,6 +62,9 @@ int setupCallbacks(void) {
 
 // Renderer instance
 Renderer renderer;
+
+// Font instance
+Font defaultFont(ResourceLocation("minecraft:default"));
 
 int initGL() {
   // Initialize graphics using the renderer
@@ -166,6 +170,24 @@ int main(int argc, char *argv[]) {
             << "START: Exit\n"
             << "=====================\n"
             << std::endl;
+            
+  // Print font loading information
+  std::cout << "\n=== Font Information ===\n"
+            << "Default font loaded with " << defaultFont.providers.size() << " providers\n";
+  int providerIndex = 0;
+  for (const auto& provider : defaultFont.providers) {
+    std::cout << "Provider " << ++providerIndex << ": ";
+    if (dynamic_cast<BitmapFontProvider*>(provider.get())) {
+      auto* bitmap = dynamic_cast<BitmapFontProvider*>(provider.get());
+      std::cout << "Bitmap provider with file: " << bitmap->file.toString() << "\n";
+    } else if (dynamic_cast<SpaceFontProvider*>(provider.get())) {
+      auto* space = dynamic_cast<SpaceFontProvider*>(provider.get());
+      std::cout << "Space provider with " << space->advances.size() << " advances\n";
+    } else {
+      std::cout << "Unknown provider type\n";
+    }
+  }
+  std::cout << "=====================\n" << std::endl;
 
   int running = 1;
   while (running) {

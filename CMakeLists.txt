@@ -9,6 +9,7 @@ add_executable(gltest.elf
     src/model.cpp
     src/texture_manager.cpp
     src/renderer.cpp
+    src/font.cpp
 )
 target_include_directories(gltest.elf PRIVATE
     include
