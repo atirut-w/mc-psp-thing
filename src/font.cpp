@@ -56,6 +56,7 @@ void Font::loadFont(const ResourceLocation &location) {
         bitmapProvider.file =
             ResourceLocation(provider["file"].get<std::string>());
         bitmapProvider.ascent = provider["ascent"];
+        // TODO: Handle UTF-16 encoding
         bitmapProvider.chars =
             provider["chars"].get<std::vector<std::string>>();
         if (provider.contains("height")) {
