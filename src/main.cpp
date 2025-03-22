@@ -183,7 +183,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Provider " << ++providerIndex << ": ";
     if (dynamic_cast<BitmapFontProvider *>(provider.get())) {
       auto *bitmap = dynamic_cast<BitmapFontProvider *>(provider.get());
-      std::cout << "Bitmap provider with file: " << bitmap->file.toString()
+      std::cout << "Bitmap provider with file: " << bitmap->file.resolvePath("texture")
                 << "\n";
     } else if (dynamic_cast<SpaceFontProvider *>(provider.get())) {
       auto *space = dynamic_cast<SpaceFontProvider *>(provider.get());

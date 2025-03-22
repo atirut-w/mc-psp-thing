@@ -11,7 +11,7 @@ Font::Font(const ResourceLocation &location) {
 
 void Font::loadFont(const ResourceLocation &location) {
   std::string fontPath =
-      "umd0:/assets/" + location.getFilePath("font") + ".json";
+      "umd0:/" + location.resolvePath("font") + ".json";
   std::cout << "Loading font from: " << fontPath << std::endl;
 
   std::ifstream fontFile(fontPath);

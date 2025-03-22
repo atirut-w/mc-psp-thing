@@ -18,15 +18,9 @@ public:
     }
   }
 
-  ResourceLocation() : ns("minecraft"), path("") {}
+  ResourceLocation() = default;
 
-  std::string toString() const { return ns + ":" + path; }
-
-  const std::string &getNamespace() const { return ns; }
-
-  const std::string &getPath() const { return path; }
-
-  std::string getFilePath(const std::string &baseDir) const {
-    return ns + "/" + baseDir + "/" + path;
+  std::string resolvePath(const std::string ctx) const {
+    return "assets/" + ns + "/" + ctx + "/" + path;
   }
 };

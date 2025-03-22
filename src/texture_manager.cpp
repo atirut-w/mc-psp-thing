@@ -8,7 +8,7 @@ std::unordered_map<std::string, GLuint> TextureManager::textureCache;
 
 GLuint TextureManager::loadTexture(const ResourceLocation &location) {
   std::string texturePath =
-      "umd0:/assets/" + location.getFilePath("textures") + ".png";
+      "umd0:/" + location.resolvePath("textures") + ".png";
 
   // Check if texture is already loaded
   if (isTextureLoaded(texturePath)) {
@@ -133,10 +133,8 @@ GLuint TextureManager::loadTexture(const ResourceLocation &location) {
 }
 
 GLuint TextureManager::getTexture(const ResourceLocation &location) {
-  // std::string texturePath = "umd0:/assets/" + location.getNamespace() +
-  //                           "/textures/" + location.getPath() + ".png";
   std::string texturePath =
-      "umd0:/assets/" + location.getFilePath("textures") + ".png";
+      "umd0:/" + location.resolvePath("textures") + ".png";
   return getTexture(texturePath);
 }
 
