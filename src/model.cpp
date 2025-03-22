@@ -319,14 +319,14 @@ std::string Model::getParticleTexture() const {
 
 // Render the model
 void Model::render() const {
-  if (elements.empty()) {
-    std::cerr << "Warning: Attempting to render model with no elements"
-              << std::endl;
-    return;
-  }
+//   if (elements.empty()) {
+//     std::cerr << "Warning: Attempting to render model with no elements"
+//               << std::endl;
+//     return;
+//   }
 
-  std::cout << "Rendering model with " << elements.size() << " elements"
-            << std::endl;
+//   std::cout << "Rendering model with " << elements.size() << " elements"
+//             << std::endl;
 
   // Enable texture mapping and backface culling
   glEnable(GL_TEXTURE_2D);
