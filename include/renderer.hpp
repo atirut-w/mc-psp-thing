@@ -1,15 +1,15 @@
 #pragma once
 #include "model.hpp"
-#include <GLES/egl.h>
-#include <GLES/gl.h>
+#include <raylib.h>
 #include <string>
 #include <vector>
 
 // Forward declarations
 class ResourceLocation;
+class BlockModel;
 
-// Camera data structure
-struct Camera {
+// Custom camera data structure (to avoid conflicts with raylib's Camera)
+struct CustomCamera {
   float posX = 0.0f;
   float posY = -2.0f;
   float posZ = -8.0f;
@@ -21,22 +21,14 @@ struct Camera {
 // state
 class Renderer {
 private:
-  // EGL state
-  static EGLDisplay display;
-  static EGLContext context;
-  static EGLSurface surface;
-
   // Viewport dimensions
   static int viewportWidth;
   static int viewportHeight;
 
   // Instance state
-  Camera camera;
+  CustomCamera camera;
   bool initialized = false;
-
-  // Helper methods
-  static void gluPerspective(GLfloat fovy, GLfloat aspect, GLfloat zNear,
-                             GLfloat zFar);
+  Camera raylibCamera;
 
 public:
   Renderer();
@@ -52,10 +44,10 @@ public:
   static void swapBuffers();
 
   // Texture loading
-  static GLuint loadTexture(const ResourceLocation &location);
-  static GLuint loadTexture(const std::string &texturePath);
+  static Texture2D loadTexture(const ResourceLocation &location);
+  static Texture2D loadTexture(const std::string &texturePath);
 
-  // OpenGL state management
+  // Raylib state management
   static void setClearColor(float r, float g, float b, float a = 1.0f);
   static void clearBuffers();
   static void setColor(float r, float g, float b, float a = 1.0f);
@@ -88,10 +80,11 @@ public:
   void endFrame();
 
   // Camera controls
-  void setCamera(const Camera &cam);
-  Camera &getCamera();
+  void setCamera(const CustomCamera &cam);
+  CustomCamera &getCamera();
+  Camera &getRaylibCamera();
 
   // Model rendering
-  void renderModel(const Model &model, float x, float y, float z,
+  void renderModel(const BlockModel &model, float x, float y, float z,
                    float scale_factor = 1.0f);
 };

@@ -2,17 +2,22 @@
 #include "texture_manager.hpp"
 #include <iostream>
 #include <math.h>
+#include <rlgl.h>
 
 // Initialize static members
-EGLDisplay Renderer::display = EGL_NO_DISPLAY;
-EGLContext Renderer::context = EGL_NO_CONTEXT;
-EGLSurface Renderer::surface = EGL_NO_SURFACE;
 int Renderer::viewportWidth = 480;
 int Renderer::viewportHeight = 272;
 
 Renderer::Renderer() {
   // Initialize default values
-  initialized = (display != EGL_NO_DISPLAY);
+  initialized = false;
+  
+  // Initialize raylib camera
+  raylibCamera.position = (Vector3){ 0.0f, 2.0f, 8.0f };  // Camera position
+  raylibCamera.target = (Vector3){ 0.0f, 0.0f, 0.0f };    // Camera looking at point
+  raylibCamera.up = (Vector3){ 0.0f, 1.0f, 0.0f };        // Camera up vector
+  raylibCamera.fovy = 45.0f;                              // Camera field-of-view Y
+  raylibCamera.projection = CAMERA_PERSPECTIVE;           // Camera mode type
 }
 
 Renderer::~Renderer() {
@@ -20,160 +25,88 @@ Renderer::~Renderer() {
   // That must be done explicitly with terminateGraphics()
 }
 
-// Custom perspective projection function for OpenGL ES 1.0
-void Renderer::gluPerspective(GLfloat fovy, GLfloat aspect, GLfloat zNear,
-                              GLfloat zFar) {
-  GLfloat frustumHeight = tanf(fovy * M_PI / 360.0f) * zNear;
-  GLfloat frustumWidth = frustumHeight * aspect;
-
-  glFrustumf(-frustumWidth, frustumWidth, -frustumHeight, frustumHeight, zNear,
-             zFar);
-}
-
 bool Renderer::initializeGraphics(int width, int height) {
   // Save viewport dimensions
   viewportWidth = width;
   viewportHeight = height;
 
-  // Setup EGL
-  EGLint majorVersion, minorVersion;
-  EGLConfig config;
-  EGLint numConfigs;
-
-  EGLint attribList[] = {EGL_RED_SIZE,   8,  EGL_GREEN_SIZE, 8,
-                         EGL_BLUE_SIZE,  8,  EGL_ALPHA_SIZE, 8,
-                         EGL_DEPTH_SIZE, 16, EGL_NONE};
-
-  // Get display
-  display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-  if (display == EGL_NO_DISPLAY) {
-    std::cerr << "Failed to get EGL display" << std::endl;
-    return false;
-  }
-
-  // Initialize
-  if (!eglInitialize(display, &majorVersion, &minorVersion)) {
-    std::cerr << "Failed to initialize EGL" << std::endl;
-    return false;
-  }
-
-  // Get config
-  if (!eglChooseConfig(display, attribList, &config, 1, &numConfigs)) {
-    std::cerr << "Failed to choose EGL config" << std::endl;
-    return false;
-  }
-
-  // Create surface
-  surface = eglCreateWindowSurface(display, config, 0, NULL);
-  if (surface == EGL_NO_SURFACE) {
-    std::cerr << "Failed to create EGL surface" << std::endl;
-    return false;
-  }
-
-  // Create context
-  context = eglCreateContext(display, config, EGL_NO_CONTEXT, NULL);
-  if (context == EGL_NO_CONTEXT) {
-    std::cerr << "Failed to create EGL context" << std::endl;
-    return false;
-  }
-
-  // Make current
-  if (!eglMakeCurrent(display, surface, surface, context)) {
-    std::cerr << "Failed to make EGL context current" << std::endl;
-    return false;
-  }
-
-  // Setup viewport
-  glViewport(0, 0, width, height);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(45.0f, (float)width / (float)height, 0.1f, 100.0f);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
+  // Initialize raylib window
+  InitWindow(width, height, "GLTest");
+  
+  // Set target FPS (maximum)
+  SetTargetFPS(60);
+  
   // Enable depth testing
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL);
-
-  // Disable culling by default for maximum compatibility
-  glDisable(GL_CULL_FACE);
-
-  // Enable texturing
-  glEnable(GL_TEXTURE_2D);
-
-  return true;
+  return IsWindowReady();
 }
 
 void Renderer::terminateGraphics() {
-  // Terminate EGL
-  if (display != EGL_NO_DISPLAY) {
-    eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-
-    if (context != EGL_NO_CONTEXT) {
-      eglDestroyContext(display, context);
-      context = EGL_NO_CONTEXT;
-    }
-
-    if (surface != EGL_NO_SURFACE) {
-      eglDestroySurface(display, surface);
-      surface = EGL_NO_SURFACE;
-    }
-
-    eglTerminate(display);
-    display = EGL_NO_DISPLAY;
-  }
+  // Close raylib window and resources
+  CloseWindow();
 }
 
 void Renderer::swapBuffers() {
-  if (display != EGL_NO_DISPLAY && surface != EGL_NO_SURFACE) {
-    eglSwapBuffers(display, surface);
-  }
+  // No need to manually swap buffers in raylib, EndDrawing() handles it
 }
 
-GLuint Renderer::loadTexture(const ResourceLocation &location) {
+Texture2D Renderer::loadTexture(const ResourceLocation &location) {
   // Delegate to the TextureManager's static method
   return TextureManager::loadTexture(location);
 }
 
-GLuint Renderer::loadTexture(const std::string &texturePath) {
+Texture2D Renderer::loadTexture(const std::string &texturePath) {
   // Delegate to the TextureManager's static method
   return TextureManager::getTexture(texturePath);
 }
 
 void Renderer::setClearColor(float r, float g, float b, float a) {
-  glClearColor(r, g, b, a);
+  ClearBackground((Color){ (unsigned char)(r*255), (unsigned char)(g*255), 
+                          (unsigned char)(b*255), (unsigned char)(a*255) });
 }
 
 void Renderer::clearBuffers() {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  // Clearing is handled in BeginDrawing() in raylib
 }
 
 void Renderer::beginFrame() {
-  clearBuffers();
-  glLoadIdentity();
-
-  // Apply camera transformation
-  glRotatef(camera.rotX, 1.0f, 0.0f, 0.0f);
-  glRotatef(camera.rotY, 0.0f, 1.0f, 0.0f);
-  glTranslatef(camera.posX, camera.posY, camera.posZ);
+  BeginDrawing();
+  ClearBackground((Color){ 0, 127, 204, 255 }); // Sky-blue background
+  
+  BeginMode3D(raylibCamera);
+  
+  // Update camera from our custom camera
+  raylibCamera.position.x = -camera.posX;
+  raylibCamera.position.y = -camera.posY;
+  raylibCamera.position.z = -camera.posZ;
+  
+  // Use the camera rotation to update the target point
+  float angleX = camera.rotX * DEG2RAD;
+  float angleY = camera.rotY * DEG2RAD;
+  
+  // Calculate target point based on rotation angles
+  raylibCamera.target.x = raylibCamera.position.x + sin(angleY);
+  raylibCamera.target.y = raylibCamera.position.y - sin(angleX);
+  raylibCamera.target.z = raylibCamera.position.z - cos(angleY);
 }
 
 void Renderer::endFrame() {
-  // Ensure we're in a clean state
-  glDisableClientState(GL_VERTEX_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-  glEnable(GL_TEXTURE_2D);
-  glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-  // Swap buffers
-  swapBuffers();
+  EndMode3D();
+  EndDrawing();
 }
 
-void Renderer::setCamera(const Camera &cam) { camera = cam; }
+void Renderer::setCamera(const CustomCamera &cam) { 
+  camera = cam; 
+}
 
-Camera &Renderer::getCamera() { return camera; }
+CustomCamera &Renderer::getCamera() { 
+  return camera; 
+}
 
-void Renderer::renderModel(const Model &model, float x, float y, float z,
+Camera &Renderer::getRaylibCamera() {
+  return raylibCamera;
+}
+
+void Renderer::renderModel(const BlockModel &model, float x, float y, float z,
                            float scale_factor) {
   pushMatrix();
   translate(x, y, z);
@@ -190,117 +123,65 @@ void Renderer::renderModel(const Model &model, float x, float y, float z,
 void Renderer::renderColoredCube(float x, float y, float z, float width,
                                  float height, float depth, float r, float g,
                                  float b, float a) {
-  pushMatrix();
-  translate(x, y, z);
-  scale(width, height, depth);
-
-  enableTexturing(false);
-  setColor(r, g, b, a);
-
-  // Define cube vertices
-  static const GLfloat cubeVerts[] = {// Top face
-                                      -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, -0.5f,
-                                      0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f,
-                                      // Bottom face
-                                      -0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f,
-                                      0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f,
-                                      // Front face
-                                      -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f,
-                                      0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f,
-                                      // Back face
-                                      -0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f,
-                                      0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f,
-                                      // Left face
-                                      -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f,
-                                      -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, -0.5f,
-                                      // Right face
-                                      0.5f, -0.5f, -0.5f, 0.5f, -0.5f, 0.5f,
-                                      0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f};
-
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(3, GL_FLOAT, 0, cubeVerts);
-
-  // Indices for drawing the cube
-  static const GLubyte cubeIndices[] = {
-      0,  1,  2,  0,  2,  3,  // Top face
-      4,  5,  6,  4,  6,  7,  // Bottom face
-      8,  9,  10, 8,  10, 11, // Front face
-      12, 13, 14, 12, 14, 15, // Back face
-      16, 17, 18, 16, 18, 19, // Left face
-      20, 21, 22, 20, 22, 23  // Right face
-  };
-
-  glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, cubeIndices);
-  glDisableClientState(GL_VERTEX_ARRAY);
-
-  enableTexturing(true);
-  resetColor();
-  popMatrix();
+  Color color = { (unsigned char)(r*255), (unsigned char)(g*255), 
+                 (unsigned char)(b*255), (unsigned char)(a*255) };
+                 
+  // Draw a colored cube
+  DrawCube((Vector3){x, y, z}, width, height, depth, color);
 }
 
 void Renderer::renderColoredPlane(float x, float y, float z, float width,
                                   float depth, float r, float g, float b,
                                   float a) {
-  pushMatrix();
-  translate(x, y, z);
-  scale(width, 0.1f, depth);
-
-  enableTexturing(false);
-  setColor(r, g, b, a);
-
-  // Simple plane vertices
-  static const GLfloat planeVerts[] = {-0.5f, 0.0f, -0.5f, 0.5f,  0.0f, -0.5f,
-                                       0.5f,  0.0f, 0.5f,  -0.5f, 0.0f, 0.5f};
-
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(3, GL_FLOAT, 0, planeVerts);
-
-  static const GLubyte planeIndices[] = {0, 1, 2, 0, 2, 3};
-  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, planeIndices);
-
-  glDisableClientState(GL_VERTEX_ARRAY);
-  enableTexturing(true);
-  resetColor();
-
-  popMatrix();
+  Color color = { (unsigned char)(r*255), (unsigned char)(g*255), 
+                 (unsigned char)(b*255), (unsigned char)(a*255) };
+                 
+  // Draw a colored plane
+  DrawPlane((Vector3){x, y, z}, (Vector2){width, depth}, color);
 }
 
 void Renderer::renderPoint(float x, float y, float z, float r, float g, float b,
                            float a) {
-  enableTexturing(false);
-  setColor(r, g, b, a);
-
-  glBegin(GL_POINTS);
-  glVertex3f(x, y, z);
-  glEnd();
-
-  resetColor();
-  enableTexturing(true);
+  Color color = { (unsigned char)(r*255), (unsigned char)(g*255), 
+                 (unsigned char)(b*255), (unsigned char)(a*255) };
+                 
+  // Draw a 3D point (small sphere for visibility)
+  DrawSphere((Vector3){x, y, z}, 0.1f, color);
 }
 
-// OpenGL state management helpers
+// Matrix operations and state management
+// These functions are mainly for compatibility with existing code
 void Renderer::setColor(float r, float g, float b, float a) {
-  glColor4f(r, g, b, a);
+  // Raylib uses immediate colors when drawing, stored in individual draw calls
 }
 
-void Renderer::resetColor() { glColor4f(1.0f, 1.0f, 1.0f, 1.0f); }
+void Renderer::resetColor() {
+  // Not needed in raylib
+}
 
 void Renderer::enableTexturing(bool enable) {
-  if (enable) {
-    glEnable(GL_TEXTURE_2D);
-  } else {
-    glDisable(GL_TEXTURE_2D);
-  }
+  // Not directly needed in raylib, texture state is per-draw call
 }
 
-void Renderer::pushMatrix() { glPushMatrix(); }
+void Renderer::pushMatrix() {
+  rlPushMatrix();
+}
 
-void Renderer::popMatrix() { glPopMatrix(); }
+void Renderer::popMatrix() {
+  rlPopMatrix();
+}
 
-void Renderer::translate(float x, float y, float z) { glTranslatef(x, y, z); }
+void Renderer::translate(float x, float y, float z) {
+  rlTranslatef(x, y, z);
+}
 
 void Renderer::rotate(float angle, float x, float y, float z) {
-  glRotatef(angle, x, y, z);
+  // In raylib we need to rotate around each axis separately if needed
+  if (x != 0.0f) rlRotatef(angle, 1.0f, 0.0f, 0.0f);
+  if (y != 0.0f) rlRotatef(angle, 0.0f, 1.0f, 0.0f);
+  if (z != 0.0f) rlRotatef(angle, 0.0f, 0.0f, 1.0f);
 }
 
-void Renderer::scale(float x, float y, float z) { glScalef(x, y, z); }
+void Renderer::scale(float x, float y, float z) {
+  rlScalef(x, y, z);
+}

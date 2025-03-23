@@ -4,12 +4,13 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <stack>
+#include <rlgl.h>
 
 // Constructor loads the model from the given ResourceLocation
-Model::Model(const ResourceLocation &location) { loadModel(location); }
+BlockModel::BlockModel(const ResourceLocation &location) { loadModel(location); }
 
 // Load model from a file
-void Model::loadModel(const ResourceLocation &location) {
+void BlockModel::loadModel(const ResourceLocation &location) {
   std::string modelPath =
       "umd0:/" + location.resolvePath("models") + ".json";
   std::cout << "Loading model from: " << modelPath << std::endl;
@@ -34,7 +35,7 @@ void Model::loadModel(const ResourceLocation &location) {
 }
 
 // Parse model data from JSON
-void Model::parseModelData(const nlohmann::json &data) {
+void BlockModel::parseModelData(const nlohmann::json &data) {
   // Check for parent model
   if (data.contains("parent")) {
     parent = data["parent"];
@@ -65,7 +66,7 @@ void Model::parseModelData(const nlohmann::json &data) {
 }
 
 // Load a parent model
-void Model::loadParentModel(const std::string &parentPath) {
+void BlockModel::loadParentModel(const std::string &parentPath) {
   // Handle builtin/generated special case
   if (parentPath == "builtin/generated") {
     std::cout << "Using builtin/generated model" << std::endl;
@@ -98,7 +99,7 @@ void Model::loadParentModel(const std::string &parentPath) {
 }
 
 // Parse display settings
-void Model::parseDisplay(const nlohmann::json &displayJson) {
+void BlockModel::parseDisplay(const nlohmann::json &displayJson) {
   for (auto &[position, transform] : displayJson.items()) {
     display[position] = parseDisplayTransform(transform);
   }
@@ -106,7 +107,7 @@ void Model::parseDisplay(const nlohmann::json &displayJson) {
 
 // Parse display transform
 DisplayTransform
-Model::parseDisplayTransform(const nlohmann::json &transformJson) {
+BlockModel::parseDisplayTransform(const nlohmann::json &transformJson) {
   DisplayTransform transform;
 
   if (transformJson.contains("rotation")) {
@@ -142,14 +143,14 @@ Model::parseDisplayTransform(const nlohmann::json &transformJson) {
 }
 
 // Parse textures
-void Model::parseTextures(const nlohmann::json &texturesJson) {
+void BlockModel::parseTextures(const nlohmann::json &texturesJson) {
   for (auto &[name, path] : texturesJson.items()) {
     textures[name] = path;
   }
 }
 
 // Parse elements
-void Model::parseElements(const nlohmann::json &elementsJson) {
+void BlockModel::parseElements(const nlohmann::json &elementsJson) {
   if (!elementsJson.is_array()) {
     std::cerr << "Elements is not an array" << std::endl;
     return;
@@ -161,7 +162,7 @@ void Model::parseElements(const nlohmann::json &elementsJson) {
 }
 
 // Parse individual element
-ModelElement Model::parseElement(const nlohmann::json &elementJson) {
+ModelElement BlockModel::parseElement(const nlohmann::json &elementJson) {
   ModelElement element;
 
   // Parse from/to
@@ -241,7 +242,7 @@ ModelElement Model::parseElement(const nlohmann::json &elementJson) {
 }
 
 // Parse individual face
-ModelFace Model::parseFace(const nlohmann::json &faceJson) {
+ModelFace BlockModel::parseFace(const nlohmann::json &faceJson) {
   ModelFace face;
 
   // Parse UV
@@ -281,7 +282,7 @@ ModelFace Model::parseFace(const nlohmann::json &faceJson) {
 }
 
 // Resolves a texture variable reference
-std::string Model::resolveTexture(const std::string &name) {
+std::string BlockModel::resolveTexture(const std::string &name) {
   // If it's not a variable reference, return as is
   if (name.empty() || name[0] != '#') {
     return name;
@@ -309,7 +310,7 @@ std::string Model::resolveTexture(const std::string &name) {
 }
 
 // Get the particle texture (used for breaking particles)
-std::string Model::getParticleTexture() const {
+std::string BlockModel::getParticleTexture() const {
   auto it = textures.find("particle");
   if (it != textures.end()) {
     return it->second;
@@ -318,7 +319,7 @@ std::string Model::getParticleTexture() const {
 }
 
 // Render the model
-void Model::render() const {
+void BlockModel::render() const {
 //   if (elements.empty()) {
 //     std::cerr << "Warning: Attempting to render model with no elements"
 //               << std::endl;
@@ -328,22 +329,24 @@ void Model::render() const {
 //   std::cout << "Rendering model with " << elements.size() << " elements"
 //             << std::endl;
 
-  // Enable texture mapping and backface culling
-  glEnable(GL_TEXTURE_2D);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
+  // Enable backface culling
+  rlEnableBackfaceCulling();
+  
+  // Enable alpha blending for transparency
+  rlEnableColorBlend();
 
   // Render each element (cuboid)
   for (const auto &element : elements) {
     renderElement(element);
   }
 
-  // Disable backface culling when done
-  glDisable(GL_CULL_FACE);
+  // Disable states when done
+  rlDisableColorBlend();
+  rlDisableBackfaceCulling();
 }
 
 // Helper method to render a single model element
-void Model::renderElement(const ModelElement &element) const {
+void BlockModel::renderElement(const ModelElement &element) const {
   // Calculate element dimensions and position
   float x1 = element.from[0] / 16.0f;
   float y1 = element.from[1] / 16.0f;
@@ -355,25 +358,25 @@ void Model::renderElement(const ModelElement &element) const {
   // Apply element rotation if needed
   if (element.rotation.has_value()) {
     const auto &rotation = element.rotation.value();
-    glPushMatrix();
+    rlPushMatrix();
 
     // Move to rotation origin
     float originX = rotation.origin[0] / 16.0f;
     float originY = rotation.origin[1] / 16.0f;
     float originZ = rotation.origin[2] / 16.0f;
-    glTranslatef(originX, originY, originZ);
+    rlTranslatef(originX, originY, originZ);
 
     // Apply rotation
     if (rotation.axis == "x") {
-      glRotatef(rotation.angle, 1.0f, 0.0f, 0.0f);
+      rlRotatef(rotation.angle, 1.0f, 0.0f, 0.0f);
     } else if (rotation.axis == "y") {
-      glRotatef(rotation.angle, 0.0f, 1.0f, 0.0f);
+      rlRotatef(rotation.angle, 0.0f, 1.0f, 0.0f);
     } else if (rotation.axis == "z") {
-      glRotatef(rotation.angle, 0.0f, 0.0f, 1.0f);
+      rlRotatef(rotation.angle, 0.0f, 0.0f, 1.0f);
     }
 
     // Move back from rotation origin
-    glTranslatef(-originX, -originY, -originZ);
+    rlTranslatef(-originX, -originY, -originZ);
   }
 
   // Render each face
@@ -409,12 +412,12 @@ void Model::renderElement(const ModelElement &element) const {
 
   // Restore matrix if rotation was applied
   if (element.rotation.has_value()) {
-    glPopMatrix();
+    rlPopMatrix();
   }
 }
 
 // Helper method to render a single face
-void Model::renderFace(const std::string &faceName, const ModelFace &face,
+void BlockModel::renderFace(const std::string &faceName, const ModelFace &face,
                        float x1, float y1, float z1, float x2, float y2,
                        float z2) const {
   // Skip faces with no texture
@@ -425,223 +428,123 @@ void Model::renderFace(const std::string &faceName, const ModelFace &face,
   // Resolve the texture reference
   std::string textureRef = face.texture;
   if (!textureRef.empty() && textureRef[0] == '#') {
-    textureRef = const_cast<Model *>(this)->resolveTexture(textureRef);
+    textureRef = const_cast<BlockModel *>(this)->resolveTexture(textureRef);
   }
 
-  // Find the texture ID from the texture manager
-  GLuint textureID = 0;
+  // Find the texture from the texture manager
+  Texture2D texture = { 0 };
 
   if (!textureRef.empty()) {
     // Texture might be a direct ResourceLocation or a string path
     // Try to load it directly
-    textureID = TextureManager::getTexture(textureRef);
+    texture = TextureManager::getTexture(textureRef);
 
     // If not successful, try to load as ResourceLocation
-    if (textureID == 0) {
+    if (texture.id == 0) {
       ResourceLocation textureLoc(textureRef);
-      textureID = TextureManager::loadTexture(textureLoc);
+      texture = TextureManager::loadTexture(textureLoc);
     }
   }
 
-  // Bind the texture
-  glBindTexture(GL_TEXTURE_2D, textureID);
-
-  // Set up the vertex arrays
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-  // Get UV coordinates - use correct order after fixing the inverted
-  // coordinates Originally we had to swap x1/x2 and y1/y2 to fix UV coordinate
-  // flipping
-  float u1 = face.uv.x1;
-  float v1 = face.uv.y2;
-  float u2 = face.uv.x2;
-  float v2 = face.uv.y1;
+  // Get UV coordinates - use correct order after fixing the inverted coordinates
+  float texU1 = face.uv.x1;
+  float texV1 = face.uv.y2;
+  float texU2 = face.uv.x2;
+  float texV2 = face.uv.y1;
 
   // Apply face rotation if needed
   if (face.rotation != 0) {
     // Save original UV coordinates
-    float orig_u1 = u1;
-    float orig_v1 = v1;
-    float orig_u2 = u2;
-    float orig_v2 = v2;
+    float orig_u1 = texU1;
+    float orig_v1 = texV1;
+    float orig_u2 = texU2;
+    float orig_v2 = texV2;
 
     // Apply rotation
     switch (face.rotation) {
     case 90:
-      u1 = orig_v1;
-      v1 = 1.0f - orig_u2;
-      u2 = orig_v2;
-      v2 = 1.0f - orig_u1;
+      texU1 = orig_v1;
+      texV1 = 1.0f - orig_u2;
+      texU2 = orig_v2;
+      texV2 = 1.0f - orig_u1;
       break;
     case 180:
-      u1 = 1.0f - orig_u2;
-      v1 = 1.0f - orig_v2;
-      u2 = 1.0f - orig_u1;
-      v2 = 1.0f - orig_v1;
+      texU1 = 1.0f - orig_u2;
+      texV1 = 1.0f - orig_v2;
+      texU2 = 1.0f - orig_u1;
+      texV2 = 1.0f - orig_v1;
       break;
     case 270:
-      u1 = 1.0f - orig_v2;
-      v1 = orig_u1;
-      u2 = 1.0f - orig_v1;
-      v2 = orig_u2;
+      texU1 = 1.0f - orig_v2;
+      texV1 = orig_u1;
+      texU2 = 1.0f - orig_v1;
+      texV2 = orig_u2;
       break;
     }
   }
 
-  // Set up the vertices and texture coordinates based on the face direction
-  GLfloat vertices[12]; // 4 vertices * 3 coordinates
-  GLfloat texCoords[8]; // 4 vertices * 2 coordinates
-
+  // Define vertices for each face
+  Vector3 vertex0 = {0}, vertex1 = {0}, vertex2 = {0}, vertex3 = {0};
+  
   if (faceName == "down") {
     // Down face (Y-)
-    vertices[0] = x1;
-    vertices[1] = y1;
-    vertices[2] = z1; // Bottom-left
-    vertices[3] = x2;
-    vertices[4] = y1;
-    vertices[5] = z1; // Bottom-right
-    vertices[6] = x2;
-    vertices[7] = y1;
-    vertices[8] = z2; // Top-right
-    vertices[9] = x1;
-    vertices[10] = y1;
-    vertices[11] = z2; // Top-left
-
-    texCoords[0] = u1;
-    texCoords[1] = v1;
-    texCoords[2] = u2;
-    texCoords[3] = v1;
-    texCoords[4] = u2;
-    texCoords[5] = v2;
-    texCoords[6] = u1;
-    texCoords[7] = v2;
+    vertex0 = (Vector3){ x1, y1, z1 }; // Bottom-left
+    vertex1 = (Vector3){ x2, y1, z1 }; // Bottom-right
+    vertex2 = (Vector3){ x2, y1, z2 }; // Top-right
+    vertex3 = (Vector3){ x1, y1, z2 }; // Top-left
   } else if (faceName == "up") {
     // Up face (Y+)
-    vertices[0] = x1;
-    vertices[1] = y2;
-    vertices[2] = z2; // Bottom-left
-    vertices[3] = x2;
-    vertices[4] = y2;
-    vertices[5] = z2; // Bottom-right
-    vertices[6] = x2;
-    vertices[7] = y2;
-    vertices[8] = z1; // Top-right
-    vertices[9] = x1;
-    vertices[10] = y2;
-    vertices[11] = z1; // Top-left
-
-    texCoords[0] = u1;
-    texCoords[1] = v1;
-    texCoords[2] = u2;
-    texCoords[3] = v1;
-    texCoords[4] = u2;
-    texCoords[5] = v2;
-    texCoords[6] = u1;
-    texCoords[7] = v2;
+    vertex0 = (Vector3){ x1, y2, z2 }; // Bottom-left
+    vertex1 = (Vector3){ x2, y2, z2 }; // Bottom-right
+    vertex2 = (Vector3){ x2, y2, z1 }; // Top-right
+    vertex3 = (Vector3){ x1, y2, z1 }; // Top-left
   } else if (faceName == "north") {
     // North face (Z-)
-    vertices[0] = x2;
-    vertices[1] = y1;
-    vertices[2] = z1; // Bottom-left
-    vertices[3] = x1;
-    vertices[4] = y1;
-    vertices[5] = z1; // Bottom-right
-    vertices[6] = x1;
-    vertices[7] = y2;
-    vertices[8] = z1; // Top-right
-    vertices[9] = x2;
-    vertices[10] = y2;
-    vertices[11] = z1; // Top-left
-
-    texCoords[0] = u1;
-    texCoords[1] = v1;
-    texCoords[2] = u2;
-    texCoords[3] = v1;
-    texCoords[4] = u2;
-    texCoords[5] = v2;
-    texCoords[6] = u1;
-    texCoords[7] = v2;
+    vertex0 = (Vector3){ x2, y1, z1 }; // Bottom-left
+    vertex1 = (Vector3){ x1, y1, z1 }; // Bottom-right
+    vertex2 = (Vector3){ x1, y2, z1 }; // Top-right
+    vertex3 = (Vector3){ x2, y2, z1 }; // Top-left
   } else if (faceName == "south") {
     // South face (Z+)
-    vertices[0] = x1;
-    vertices[1] = y1;
-    vertices[2] = z2; // Bottom-left
-    vertices[3] = x2;
-    vertices[4] = y1;
-    vertices[5] = z2; // Bottom-right
-    vertices[6] = x2;
-    vertices[7] = y2;
-    vertices[8] = z2; // Top-right
-    vertices[9] = x1;
-    vertices[10] = y2;
-    vertices[11] = z2; // Top-left
-
-    texCoords[0] = u1;
-    texCoords[1] = v1;
-    texCoords[2] = u2;
-    texCoords[3] = v1;
-    texCoords[4] = u2;
-    texCoords[5] = v2;
-    texCoords[6] = u1;
-    texCoords[7] = v2;
+    vertex0 = (Vector3){ x1, y1, z2 }; // Bottom-left
+    vertex1 = (Vector3){ x2, y1, z2 }; // Bottom-right
+    vertex2 = (Vector3){ x2, y2, z2 }; // Top-right
+    vertex3 = (Vector3){ x1, y2, z2 }; // Top-left
   } else if (faceName == "west") {
     // West face (X-)
-    vertices[0] = x1;
-    vertices[1] = y1;
-    vertices[2] = z1; // Bottom-left
-    vertices[3] = x1;
-    vertices[4] = y1;
-    vertices[5] = z2; // Bottom-right
-    vertices[6] = x1;
-    vertices[7] = y2;
-    vertices[8] = z2; // Top-right
-    vertices[9] = x1;
-    vertices[10] = y2;
-    vertices[11] = z1; // Top-left
-
-    texCoords[0] = u1;
-    texCoords[1] = v1;
-    texCoords[2] = u2;
-    texCoords[3] = v1;
-    texCoords[4] = u2;
-    texCoords[5] = v2;
-    texCoords[6] = u1;
-    texCoords[7] = v2;
+    vertex0 = (Vector3){ x1, y1, z1 }; // Bottom-left
+    vertex1 = (Vector3){ x1, y1, z2 }; // Bottom-right
+    vertex2 = (Vector3){ x1, y2, z2 }; // Top-right
+    vertex3 = (Vector3){ x1, y2, z1 }; // Top-left
   } else if (faceName == "east") {
     // East face (X+)
-    vertices[0] = x2;
-    vertices[1] = y1;
-    vertices[2] = z2; // Bottom-left
-    vertices[3] = x2;
-    vertices[4] = y1;
-    vertices[5] = z1; // Bottom-right
-    vertices[6] = x2;
-    vertices[7] = y2;
-    vertices[8] = z1; // Top-right
-    vertices[9] = x2;
-    vertices[10] = y2;
-    vertices[11] = z2; // Top-left
-
-    texCoords[0] = u1;
-    texCoords[1] = v1;
-    texCoords[2] = u2;
-    texCoords[3] = v1;
-    texCoords[4] = u2;
-    texCoords[5] = v2;
-    texCoords[6] = u1;
-    texCoords[7] = v2;
+    vertex0 = (Vector3){ x2, y1, z2 }; // Bottom-left
+    vertex1 = (Vector3){ x2, y1, z1 }; // Bottom-right
+    vertex2 = (Vector3){ x2, y2, z1 }; // Top-right
+    vertex3 = (Vector3){ x2, y2, z2 }; // Top-left
   }
 
-  // Set the vertex and texture coordinate pointers
-  glVertexPointer(3, GL_FLOAT, 0, vertices);
-  glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
-
-  // Draw the face as two triangles
-  GLubyte indices[] = {0, 1, 2, 0, 2, 3};
-  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, indices);
-
-  // Clean up
-  glDisableClientState(GL_VERTEX_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+  // If we don't have a valid texture, skip rendering or render as solid color
+  if (texture.id == 0) {
+    // Skip or render as a solid color (optional)
+    return;
+  }
+  
+  // Use DrawTextureQuad for better texture handling
+  rlPushMatrix();
+    // Set the current texture
+    rlSetTexture(texture.id);
+    rlBegin(RL_QUADS);
+      // Define color (white = no tint)
+      rlColor4ub(255, 255, 255, 255);
+      
+      // Define a quad with texture coordinates
+      rlTexCoord2f(texU1, texV1); rlVertex3f(vertex0.x, vertex0.y, vertex0.z);
+      rlTexCoord2f(texU2, texV1); rlVertex3f(vertex1.x, vertex1.y, vertex1.z);
+      rlTexCoord2f(texU2, texV2); rlVertex3f(vertex2.x, vertex2.y, vertex2.z);
+      rlTexCoord2f(texU1, texV2); rlVertex3f(vertex3.x, vertex3.y, vertex3.z);
+    rlEnd();
+    // Reset texture
+    rlSetTexture(0);
+  rlPopMatrix();
 }

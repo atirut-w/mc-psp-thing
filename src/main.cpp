@@ -2,8 +2,6 @@
 #include "model.hpp"
 #include "renderer.hpp"
 #include "texture_manager.hpp"
-#include <GLES/egl.h>
-#include <GLES/gl.h>
 #include <iostream>
 #include <math.h>
 #include <pspctrl.h>
@@ -20,24 +18,24 @@ PSP_MODULE_INFO("GLTest", 0, 1, 1);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER | PSP_THREAD_ATTR_VFPU);
 
 // Global variable for models
-std::vector<std::pair<std::string, Model>> blockModels = {
-    {"dirt", Model(ResourceLocation("minecraft:block/dirt"))},
-    {"stone", Model(ResourceLocation("minecraft:block/stone"))},
-    {"oak_log", Model(ResourceLocation("minecraft:block/oak_log"))},
-    {"oak_stairs", Model(ResourceLocation("minecraft:block/oak_stairs"))},
-    {"oak_door", Model(ResourceLocation("minecraft:block/oak_door_bottom"))},
-    {"furnace", Model(ResourceLocation("minecraft:block/furnace"))},
+std::vector<std::pair<std::string, BlockModel>> blockModels = {
+    {"dirt", BlockModel(ResourceLocation("minecraft:block/dirt"))},
+    {"stone", BlockModel(ResourceLocation("minecraft:block/stone"))},
+    {"oak_log", BlockModel(ResourceLocation("minecraft:block/oak_log"))},
+    {"oak_stairs", BlockModel(ResourceLocation("minecraft:block/oak_stairs"))},
+    {"oak_door", BlockModel(ResourceLocation("minecraft:block/oak_door_bottom"))},
+    {"furnace", BlockModel(ResourceLocation("minecraft:block/furnace"))},
     {"crafting_table",
-     Model(ResourceLocation("minecraft:block/crafting_table"))},
-    {"chest", Model(ResourceLocation("minecraft:block/chest"))},
-    {"bookshelf", Model(ResourceLocation("minecraft:block/bookshelf"))},
-    {"glass", Model(ResourceLocation("minecraft:block/glass"))},
-    {"grass_block", Model(ResourceLocation("minecraft:block/grass_block"))},
+     BlockModel(ResourceLocation("minecraft:block/crafting_table"))},
+    {"chest", BlockModel(ResourceLocation("minecraft:block/chest"))},
+    {"bookshelf", BlockModel(ResourceLocation("minecraft:block/bookshelf"))},
+    {"glass", BlockModel(ResourceLocation("minecraft:block/glass"))},
+    {"grass_block", BlockModel(ResourceLocation("minecraft:block/grass_block"))},
     {"redstone_torch",
-     Model(ResourceLocation("minecraft:block/redstone_torch"))},
-    {"rail", Model(ResourceLocation("minecraft:block/rail"))},
-    {"iron_bars", Model(ResourceLocation("minecraft:block/iron_bars"))},
-    {"bed", Model(ResourceLocation("minecraft:block/red_bed_head"))}};
+     BlockModel(ResourceLocation("minecraft:block/redstone_torch"))},
+    {"rail", BlockModel(ResourceLocation("minecraft:block/rail"))},
+    {"iron_bars", BlockModel(ResourceLocation("minecraft:block/iron_bars"))},
+    {"bed", BlockModel(ResourceLocation("minecraft:block/red_bed_head"))}};
 
 int exitCallback(int arg1, int arg2, void *common) {
   sceKernelExitGame();
@@ -64,7 +62,7 @@ int setupCallbacks(void) {
 Renderer renderer;
 
 // Font instance
-Font defaultFont(ResourceLocation("minecraft:default"));
+CustomFont defaultFont(ResourceLocation("minecraft:default"));
 
 int initGL() {
   // Initialize graphics using the renderer
@@ -76,9 +74,6 @@ int initGL() {
 }
 
 void drawScene() {
-  // Set the sky-blue clear color
-  Renderer::setClearColor(0.0f, 0.5f, 0.8f, 1.0f);
-
   // Begin frame (clears buffers and sets up camera)
   renderer.beginFrame();
 
@@ -140,6 +135,9 @@ void drawScene() {
 
   Renderer::popMatrix();
 
+  // Draw 2D text overlay if needed (after EndMode3D but before EndDrawing)
+  // DrawText("Asset Zoo", 10, 10, 20, WHITE);
+
   // End frame and swap buffers
   renderer.endFrame();
 }
@@ -147,13 +145,12 @@ void drawScene() {
 int main(int argc, char *argv[]) {
   setupCallbacks();
 
-  // Initialize OpenGL
+  // Initialize Raylib
   if (initGL() < 0) {
     return 1;
   }
 
   // Main loop variables
-
   SceCtrlData pad;
 
   // Enable analog stick
@@ -195,18 +192,17 @@ int main(int argc, char *argv[]) {
   }
   std::cout << "=====================\n" << std::endl;
 
-  int running = 1;
-  while (running) {
-
+  // Main game loop
+  while (!WindowShouldClose()) {
     // Read controller input
     sceCtrlReadBufferPositive(&pad, 1);
 
     if (pad.Buttons & PSP_CTRL_START) {
-      running = 0;
+      break; // Exit the loop
     }
 
     // Get camera for manipulation
-    Camera &camera = renderer.getCamera();
+    CustomCamera &camera = renderer.getCamera();
 
     // Analog stick for movement (forward/backward, left/right)
     if (pad.Lx != 128 || pad.Ly != 128) {
@@ -268,6 +264,7 @@ int main(int argc, char *argv[]) {
       camera.posY += MOVEMENT_SPEED;
     }
 
+    // Draw game scene
     drawScene();
   }
 

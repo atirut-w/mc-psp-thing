@@ -6,12 +6,12 @@
 #include <string>
 #include <sstream>
 
-Font::Font(const ResourceLocation &location) {
+CustomFont::CustomFont(const ResourceLocation &location) {
   // Load the font provider from the resource location
   loadFont(location);
 }
 
-void Font::loadFont(const ResourceLocation &location) {
+void CustomFont::loadFont(const ResourceLocation &location) {
   std::string fontPath =
       "umd0:/" + location.resolvePath("font") + ".json";
   std::cout << "Loading font from: " << fontPath << std::endl;

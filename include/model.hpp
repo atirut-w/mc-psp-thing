@@ -1,5 +1,6 @@
 #pragma once
 #include "resource_location.hpp"
+#include <raylib.h>
 #include <array>
 #include <nlohmann/json.hpp>
 #include <optional>
@@ -49,7 +50,7 @@ struct DisplayTransform {
 // Forward declaration
 class TextureManager;
 
-class Model {
+class BlockModel {
 private:
   std::string parent;
   bool ambientocclusion = true;
@@ -73,7 +74,7 @@ private:
                   float y1, float z1, float x2, float y2, float z2) const;
 
 public:
-  Model(const ResourceLocation &location);
+  BlockModel(const ResourceLocation &location);
 
   // Load the model from a file
   void loadModel(const ResourceLocation &location);

@@ -28,9 +28,9 @@ public:
   std::unordered_map<std::string, int> advances;
 };
 
-class Font {
+class CustomFont {
 public:
-  Font(const ResourceLocation &location);
+  CustomFont(const ResourceLocation &location);
 
   std::vector<std::unique_ptr<FontProvider>> providers;
 
