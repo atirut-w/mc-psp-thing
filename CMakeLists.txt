@@ -26,6 +26,7 @@ target_link_libraries(gltest.elf PRIVATE
     png
     z
     nlohmann_json
+    raylib
 )
 
 add_custom_target(fixup-imports
