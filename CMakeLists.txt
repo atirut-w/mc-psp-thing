@@ -7,10 +7,6 @@ add_subdirectory(3rd/json)
 
 add_executable(gltest.elf
     src/main.cpp
-    src/model.cpp
-    src/texture_manager.cpp
-    src/renderer.cpp
-    src/font.cpp
 )
 target_include_directories(gltest.elf PRIVATE
     include
@@ -23,8 +19,6 @@ target_link_libraries(gltest.elf PRIVATE
     pspdisplay
     pspvfpu
     pspctrl
-    png
-    z
     nlohmann_json
     raylib
 )
