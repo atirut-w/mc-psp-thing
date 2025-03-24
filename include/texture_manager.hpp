@@ -1,26 +1,23 @@
 #pragma once
+
+#include "raylib.h"
 #include "resource_location.hpp"
-#include <GLES/gl.h>
 #include <string>
 #include <unordered_map>
+namespace MCPSP {
 
 class TextureManager {
-private:
-  static std::unordered_map<std::string, GLuint> textureCache;
+  static std::unordered_map<std::string, Texture2D> textureCache;
 
 public:
-  // Load a texture from a resource location and return its GL texture ID
-  static GLuint loadTexture(const ResourceLocation &location);
-
-  // Get a texture by resource location
-  static GLuint getTexture(const ResourceLocation &location);
-
-  // Get a texture by string path
-  static GLuint getTexture(const std::string &texturePath);
-
-  // Check if a texture is already loaded
-  static bool isTextureLoaded(const std::string &texturePath);
-
-  // Clear all textures from memory
-  static void clearTextures();
+  static const Texture2D &getTexture(const ResourceLocation &location) {
+    std::string path = location.resolvePath("textures") + ".png";
+    if (textureCache.find(path) == textureCache.end()) {
+      Texture2D texture = LoadTexture(path.c_str());
+      textureCache[path] = texture;
+    }
+    return textureCache[path];
+  }
 };
+
+}
