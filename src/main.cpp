@@ -47,9 +47,8 @@ int setupCallbacks(void) {
 void drawScene() {
   BeginMode3D(camera);
 
-  // Draw a cube
-  DrawCube((Vector3){0.0f, 1.0f, 0.0f}, 2.0f, 2.0f, 2.0f, RED);
-  DrawCubeWires((Vector3){0.0f, 1.0f, 0.0f}, 2.0f, 2.0f, 2.0f, MAROON);
+  // Draw the model
+  model.draw({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f});
 
   // Draw a grid
   DrawGrid(10, 1.0f);

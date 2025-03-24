@@ -42,6 +42,10 @@ class Model {
 
 public:
   Model(const MCPSP::ResourceLocation &location);
+
+  void draw(const std::array<float, 3> &position,
+            const std::array<float, 3> &rotation,
+            const std::array<float, 3> &scale);
 };
 
 } // namespace MCPSP
