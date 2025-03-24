@@ -7,6 +7,7 @@ add_subdirectory(3rd/json)
 
 add_executable(gltest.elf
     src/main.cpp
+    src/model.cpp
 )
 target_include_directories(gltest.elf PRIVATE
     include

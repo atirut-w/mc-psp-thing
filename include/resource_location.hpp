@@ -2,6 +2,8 @@
 #include <filesystem>
 #include <string>
 
+namespace MCPSP {
+
 class ResourceLocation {
   std::string ns;
   std::string path;
@@ -19,6 +21,8 @@ public:
   }
 
   std::string resolvePath(const std::string ctx) const {
-    return "assets/" + ns + "/" + ctx + "/" + path;
+    return "umd0:/assets/" + ns + "/" + ctx + "/" + path;
   }
 };
+
+} // namespace MCPSP

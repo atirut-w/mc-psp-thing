@@ -1,3 +1,4 @@
+#include "model.hpp"
 #include <pspctrl.h>
 #include <pspdisplay.h>
 #include <pspkernel.h>
@@ -19,6 +20,8 @@ Camera3D camera = {
   45.0f,
   CAMERA_PERSPECTIVE,
 };
+
+MCPSP::Model model(MCPSP::ResourceLocation("minecraft:block/redstone_torch"));
 
 int exitCallback(int arg1, int arg2, void *common) {
   sceKernelExitGame();
