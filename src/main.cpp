@@ -83,10 +83,10 @@ void drawModels() {
 void drawScene() {
   BeginMode3D(camera);
 
-  drawModels();
-
   // Draw a grid
   DrawGrid(10, 1.0f);
+
+  drawModels();
 
   EndMode3D();
 }
