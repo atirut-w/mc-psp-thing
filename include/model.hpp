@@ -39,6 +39,7 @@ class Model {
   std::vector<ModelElement> elements;
 
   void loadModel(const MCPSP::ResourceLocation &location);
+  ResourceLocation resolveTexture(const std::string &texture);
 
 public:
   Model(const MCPSP::ResourceLocation &location);
