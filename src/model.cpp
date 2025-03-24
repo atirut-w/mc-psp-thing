@@ -54,22 +54,29 @@ void Model::loadModel(const MCPSP::ResourceLocation &location) {
                                         rotation["origin"][1],
                                         rotation["origin"][2]};
         modelElement.rotation.axis = rotation["axis"];
-        modelElement.rotation.angle = rotation["angle"].get<float>() * 22.5f;
+        modelElement.rotation.angle = rotation["angle"].get<float>();
         modelElement.rotation.rescale = rotation.value("rescale", false);
       }
       if (element.contains("faces")) {
         for (auto &[key, value] : element["faces"].items()) {
           ModelFace face;
 
-          face.uv.from = {value["uv"][2].get<float>() / 16.0f,
-                          value["uv"][1].get<float>() / 16.0f};
-          face.uv.to = {value["uv"][0].get<float>() / 16.0f,
-                        value["uv"][3].get<float>() / 16.0f};
+          if (value.contains("uv")) {
+            face.uv.from = {value["uv"][2].get<float>() / 16.0f,
+                            value["uv"][1].get<float>() / 16.0f};
+            face.uv.to = {value["uv"][0].get<float>() / 16.0f,
+                          value["uv"][3].get<float>() / 16.0f};
+          } else {
+            face.uv.from = {element["from"][0].get<float>() / 16.0f,
+                    element["from"][1].get<float>() / 16.0f};
+            face.uv.to = {element["to"][1].get<float>() / 16.0f,
+                    element["to"][0].get<float>() / 16.0f};
+          }
 
           face.texture = value["texture"];
-          face.cullface = value.value("cullface", "");
+          face.cullface = value.value("cullface", "side");
           face.rotation = value.value("rotation", 0);
-          face.tintindex = value.value("tintindex", false);
+          face.tintindex = value.value("tintindex", -1);
           modelElement.faces[key] = face;
         }
       }
