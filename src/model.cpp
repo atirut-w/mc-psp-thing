@@ -141,22 +141,25 @@ void Model::draw(const std::array<float, 3> &position,
         // Apply rotation (in steps of 90 degrees)
         switch (face.rotation) {
         case 90:
-          u0 = u0_orig;
-          v0 = v1_orig;
-          u1 = u1_orig;
-          v1 = v0_orig;
+          // Rotate 90 degrees clockwise
+          u0 = v0_orig;
+          v0 = 1.0f - u1_orig;
+          u1 = v1_orig;
+          v1 = 1.0f - u0_orig;
           break;
         case 180:
-          u0 = u1_orig;
-          v0 = v1_orig;
-          u1 = u0_orig;
-          v1 = v0_orig;
+          // Rotate 180 degrees
+          u0 = 1.0f - u1_orig;
+          v0 = 1.0f - v1_orig;
+          u1 = 1.0f - u0_orig;
+          v1 = 1.0f - v0_orig;
           break;
         case 270:
-          u0 = u1_orig;
-          v0 = v0_orig;
-          u1 = u0_orig;
-          v1 = v1_orig;
+          // Rotate 270 degrees clockwise
+          u0 = 1.0f - v1_orig;
+          v0 = u0_orig;
+          u1 = 1.0f - v0_orig;
+          v1 = u1_orig;
           break;
         }
       }
