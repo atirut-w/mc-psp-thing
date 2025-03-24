@@ -12,7 +12,13 @@
 PSP_MODULE_INFO("GLTest", 0, 1, 1);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER | PSP_THREAD_ATTR_VFPU);
 
-Camera3D camera;
+Camera3D camera = {
+  {5.0f, 5.0f, 5.0f},
+  {0.0f, 0.0f, 0.0f},
+  {0.0f, 1.0f, 0.0f},
+  45.0f,
+  CAMERA_PERSPECTIVE,
+};
 
 int exitCallback(int arg1, int arg2, void *common) {
   sceKernelExitGame();
@@ -60,7 +66,7 @@ int main(int argc, char *argv[]) {
     ClearBackground(RAYWHITE);
     DrawFPS(10, 10);
 
-    UpdateCamera(&camera, CAMERA_FIRST_PERSON);
+    UpdateCamera(&camera, CAMERA_ORBITAL);
     drawScene();
 
     EndDrawing();
