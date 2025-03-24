@@ -12,6 +12,8 @@ target_include_directories(gltest.elf PRIVATE
     include
 )
 target_link_libraries(gltest.elf PRIVATE
+    nlohmann_json
+    raylib
     GL
     glut
     pspgu
@@ -19,8 +21,6 @@ target_link_libraries(gltest.elf PRIVATE
     pspdisplay
     pspvfpu
     pspctrl
-    nlohmann_json
-    raylib
 )
 
 add_custom_target(fixup-imports
