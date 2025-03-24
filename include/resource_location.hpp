@@ -18,8 +18,6 @@ public:
     }
   }
 
-  ResourceLocation() = default;
-
   std::string resolvePath(const std::string ctx) const {
     return "assets/" + ns + "/" + ctx + "/" + path;
   }
