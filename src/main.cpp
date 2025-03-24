@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
   while (!WindowShouldClose()) {
     BeginDrawing();
 
-    ClearBackground(RAYWHITE);
+    ClearBackground({75, 172, 255});
     DrawFPS(10, 10);
 
     UpdateCamera(&camera, CAMERA_ORBITAL);
