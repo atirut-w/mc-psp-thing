@@ -62,16 +62,18 @@ void Model::loadModel(const MCPSP::ResourceLocation &location) {
           ModelFace face;
 
           if (value.contains("uv")) {
-            face.uv.from = {value["uv"][2].get<float>() / 16.0f,
+            face.uv.from = {value["uv"][0].get<float>() / 16.0f,
                             value["uv"][1].get<float>() / 16.0f};
-            face.uv.to = {value["uv"][0].get<float>() / 16.0f,
+            face.uv.to = {value["uv"][2].get<float>() / 16.0f,
                           value["uv"][3].get<float>() / 16.0f};
           } else {
-            face.uv.from = {element["from"][0].get<float>() / 16.0f,
-                    element["from"][1].get<float>() / 16.0f};
-            face.uv.to = {element["to"][1].get<float>() / 16.0f,
-                    element["to"][0].get<float>() / 16.0f};
+            // TODO: Automatically calculate world-space UVs
+            face.uv.from = {0.0f, 0.0f};
+            face.uv.to = {1.0f, 1.0f};
           }
+
+          // Fix horizontal UVs
+          std::swap(face.uv.from[0], face.uv.to[0]);
 
           face.texture = value["texture"];
           face.cullface = value.value("cullface", "side");
