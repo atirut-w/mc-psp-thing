@@ -168,6 +168,10 @@ void Model::draw(const std::array<float, 3> &position,
             minZ = element.from[2];
       float maxX = element.to[0], maxY = element.to[1], maxZ = element.to[2];
 
+      // TODO: Something isn't right with the ordering of the vertices.
+      // - Top side of oak stairs is rotated 90 degrees (not stretched)
+      // - Side texture of the anvil is the wrong way around
+      // - Probably some other visual bugs I haven't noticed yet
       if (key == "north") {
         rlTexCoord2f(u0, v0);
         rlVertex3f(minX, maxY, minZ);
