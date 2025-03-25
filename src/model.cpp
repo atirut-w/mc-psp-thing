@@ -267,39 +267,15 @@ void Model::draw(const Vector3 &position, const Vector3 &rotation,
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.1f); // Discard pixels with alpha < 0.1
 
-    for (size_t i = 0; i < mesh.vertices.size(); i += 4) {
-      // Draw first triangle (vertices 0, 1, 2)
-      // DEV NOTE: You may think that calling rlBegin and rlEnd for every
-      // triangle is inefficient, but this is somehow literally the most
-      // efficient way to do it in raylib. If you try to batch more stuff,
-      // i.e. using just one pair of rlBegin/rlEnd for all triangles, it will be
-      // a lot slower. No, I do not know why.
-      // - Atirut
-      rlBegin(RL_TRIANGLES);
-      for (size_t j = 0; j < 3; ++j) {
-        rlTexCoord2f(mesh.uvs[i + j].x, mesh.uvs[i + j].y);
-        rlVertex3f(mesh.vertices[i + j].x, mesh.vertices[i + j].y,
-                   mesh.vertices[i + j].z);
-      }
-      rlEnd();
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-      // Draw second triangle (vertices 0, 2, 3)
-      rlBegin(RL_TRIANGLES);
-      // First vertex (0)
-      rlTexCoord2f(mesh.uvs[i].x, mesh.uvs[i].y);
-      rlVertex3f(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
+    glVertexPointer(3, GL_FLOAT, 0, mesh.vertices.data());
+    glTexCoordPointer(2, GL_FLOAT, 0, mesh.uvs.data());
+    glDrawArrays(GL_QUADS, 0, mesh.vertices.size());
 
-      // Third vertex (2)
-      rlTexCoord2f(mesh.uvs[i + 2].x, mesh.uvs[i + 2].y);
-      rlVertex3f(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y,
-                 mesh.vertices[i + 2].z);
-
-      // Fourth vertex (3)
-      rlTexCoord2f(mesh.uvs[i + 3].x, mesh.uvs[i + 3].y);
-      rlVertex3f(mesh.vertices[i + 3].x, mesh.vertices[i + 3].y,
-                 mesh.vertices[i + 3].z);
-      rlEnd();
-    }
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
     // Disable alpha testing when done
     glDisable(GL_ALPHA_TEST);
