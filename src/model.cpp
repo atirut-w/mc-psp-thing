@@ -7,6 +7,7 @@
 #include <nlohmann/json.hpp>
 #include <raymath.h>
 #include <rlgl.h>
+#include <GL/gl.h>
 
 namespace MCPSP {
 
@@ -241,7 +242,11 @@ void Model::draw(const Vector3 &position, const Vector3 &rotation,
     const Texture2D &texture =
         TextureManager::getTexture(resolveTexture(tpath));
     rlSetTexture(texture.id);
-
+    
+    // Enable alpha testing for transparency
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.1f);  // Discard pixels with alpha < 0.1
+    
     for (size_t i = 0; i < mesh.vertices.size(); i += 4) {
       // Draw first triangle (vertices 0, 1, 2)
       rlBegin(RL_TRIANGLES);
@@ -267,6 +272,9 @@ void Model::draw(const Vector3 &position, const Vector3 &rotation,
       rlVertex3f(mesh.vertices[i + 3].x, mesh.vertices[i + 3].y, mesh.vertices[i + 3].z);
       rlEnd();
     }
+    
+    // Disable alpha testing when done
+    glDisable(GL_ALPHA_TEST);
     rlSetTexture(0);
   }
 
