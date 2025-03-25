@@ -97,31 +97,33 @@ ResourceLocation Model::resolveTexture(const std::string &texture) {
 void Model::draw(const std::array<float, 3> &position,
                  const std::array<float, 3> &rotation,
                  const std::array<float, 3> &scale) {
+  rlPushMatrix();
+  rlTranslatef(position[0], position[1], position[2]);
+  rlRotatef(rotation[0], 1.0f, 0.0f, 0.0f);
+  rlRotatef(rotation[1], 0.0f, 1.0f, 0.0f);
+  rlRotatef(rotation[2], 0.0f, 0.0f, 1.0f);
+  rlScalef(scale[0], scale[1], scale[2]);
+
+  // TODO: Apply rescale, somehow
+  
   for (const auto &element : elements) {
+    // Apply element rotation if present
+    if (element.rotation.angle != 0.0f) {
+      float ox = element.rotation.origin[0] / 16.0f;
+      float oy = element.rotation.origin[1] / 16.0f;
+      float oz = element.rotation.origin[2] / 16.0f;
+
+      rlTranslatef(ox, oy, oz);
+      if (element.rotation.axis == "x")
+        rlRotatef(element.rotation.angle, 1.0f, 0.0f, 0.0f);
+      else if (element.rotation.axis == "y")
+        rlRotatef(element.rotation.angle, 0.0f, 1.0f, 0.0f);
+      else if (element.rotation.axis == "z")
+        rlRotatef(element.rotation.angle, 0.0f, 0.0f, 1.0f);
+      rlTranslatef(-ox, -oy, -oz);
+    }
+
     for (const auto &[key, face] : element.faces) {
-      rlPushMatrix();
-      rlTranslatef(position[0], position[1], position[2]);
-      rlRotatef(rotation[0], 1.0f, 0.0f, 0.0f);
-      rlRotatef(rotation[1], 0.0f, 1.0f, 0.0f);
-      rlRotatef(rotation[2], 0.0f, 0.0f, 1.0f);
-      rlScalef(scale[0], scale[1], scale[2]);
-
-      // Apply element rotation if present
-      if (element.rotation.angle != 0.0f) {
-        float ox = element.rotation.origin[0] / 16.0f;
-        float oy = element.rotation.origin[1] / 16.0f;
-        float oz = element.rotation.origin[2] / 16.0f;
-
-        rlTranslatef(ox, oy, oz);
-        if (element.rotation.axis == "x")
-          rlRotatef(element.rotation.angle, 1.0f, 0.0f, 0.0f);
-        else if (element.rotation.axis == "y")
-          rlRotatef(element.rotation.angle, 0.0f, 1.0f, 0.0f);
-        else if (element.rotation.axis == "z")
-          rlRotatef(element.rotation.angle, 0.0f, 0.0f, 1.0f);
-        rlTranslatef(-ox, -oy, -oz);
-      }
-
       rlBegin(RL_QUADS);
       const Texture2D &texture =
           TextureManager::getTexture(resolveTexture(face.texture));
@@ -230,9 +232,10 @@ void Model::draw(const std::array<float, 3> &position,
 
       rlEnd();
       rlSetTexture(0);
-      rlPopMatrix();
     }
   }
+
+  rlPopMatrix();
 }
 
 } // namespace MCPSP
