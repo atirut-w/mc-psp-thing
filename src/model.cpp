@@ -101,8 +101,27 @@ void Model::loadModel(const MCPSP::ResourceLocation &location) {
             uv2.x /= 16.0f;
             uv2.y /= 16.0f;
           } else {
-            uv1 = {0.0f, 0.0f};
-            uv2 = {1.0f, 1.0f};
+            // Generate UVs based on model coordinates
+            // Note: from/to are already normalized to 0-1 range (divided by 16)
+            if (direction == "north") {
+              uv1 = {to.x, 1.0f - to.y};     // Top-right
+              uv2 = {from.x, 1.0f - from.y}; // Bottom-left
+            } else if (direction == "south") {
+              uv1 = {from.x, 1.0f - to.y};   // Top-left
+              uv2 = {to.x, 1.0f - from.y};   // Bottom-right
+            } else if (direction == "west") {
+              uv1 = {to.z, 1.0f - to.y};     // Top-right
+              uv2 = {from.z, 1.0f - from.y}; // Bottom-left
+            } else if (direction == "east") {
+              uv1 = {from.z, 1.0f - to.y};   // Top-left
+              uv2 = {to.z, 1.0f - from.y};   // Bottom-right
+            } else if (direction == "up") {
+              uv1 = {from.x, from.z};        // Top-left
+              uv2 = {to.x, to.z};            // Bottom-right
+            } else if (direction == "down") {
+              uv1 = {from.x, to.z};          // Top-left
+              uv2 = {to.x, from.z};          // Bottom-right
+            }
           }
           std::swap(uv1.x, uv2.x);
 
