@@ -268,6 +268,12 @@ void Model::draw(const Vector3 &position, const Vector3 &rotation,
     
     for (size_t i = 0; i < mesh.vertices.size(); i += 4) {
       // Draw first triangle (vertices 0, 1, 2)
+      // DEV NOTE: You may think that calling rlBegin and rlEnd for every
+      // triangle is inefficient, but this is somehow literally the most
+      // efficient way to do it in raylib. If you try to batch more stuff,
+      // i.e. using just one pair of rlBegin/rlEnd for all triangles, it will be
+      // a lot slower. No, I do not know why.
+      // - Atirut
       rlBegin(RL_TRIANGLES);
       for (size_t j = 0; j < 3; ++j) {
         rlTexCoord2f(mesh.uvs[i + j].x, mesh.uvs[i + j].y);
