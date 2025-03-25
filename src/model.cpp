@@ -241,15 +241,30 @@ void Model::draw(const Vector3 &position, const Vector3 &rotation,
     const Texture2D &texture =
         TextureManager::getTexture(resolveTexture(tpath));
     rlSetTexture(texture.id);
-    // Remove debug print to improve performance
 
     for (size_t i = 0; i < mesh.vertices.size(); i += 4) {
-      rlBegin(RL_QUADS);
-      for (size_t j = 0; j < 4; ++j) {
+      // Draw first triangle (vertices 0, 1, 2)
+      rlBegin(RL_TRIANGLES);
+      for (size_t j = 0; j < 3; ++j) {
         rlTexCoord2f(mesh.uvs[i + j].x, mesh.uvs[i + j].y);
         rlVertex3f(mesh.vertices[i + j].x, mesh.vertices[i + j].y,
                    mesh.vertices[i + j].z);
       }
+      rlEnd();
+      
+      // Draw second triangle (vertices 0, 2, 3)
+      rlBegin(RL_TRIANGLES);
+      // First vertex (0)
+      rlTexCoord2f(mesh.uvs[i].x, mesh.uvs[i].y);
+      rlVertex3f(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
+      
+      // Third vertex (2)
+      rlTexCoord2f(mesh.uvs[i + 2].x, mesh.uvs[i + 2].y);
+      rlVertex3f(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y, mesh.vertices[i + 2].z);
+      
+      // Fourth vertex (3)
+      rlTexCoord2f(mesh.uvs[i + 3].x, mesh.uvs[i + 3].y);
+      rlVertex3f(mesh.vertices[i + 3].x, mesh.vertices[i + 3].y, mesh.vertices[i + 3].z);
       rlEnd();
     }
     rlSetTexture(0);
