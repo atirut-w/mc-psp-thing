@@ -151,88 +151,167 @@ void Model::loadModel(const MCPSP::ResourceLocation &location) {
 
           if (direction == "north") {
             // North face (-Z): Counter-clockwise from top-left
+            Vector3 v1 = {from.x, to.y, from.z};  // Top-left
+            Vector3 v2 = {to.x, to.y, from.z};    // Top-right
+            Vector3 v3 = {to.x, from.y, from.z};  // Bottom-right
+            Vector3 v4 = {from.x, from.y, from.z}; // Bottom-left
+
+            // Apply transformation
+            v1 = Vector3Transform(v1, transform);
+            v2 = Vector3Transform(v2, transform);
+            v3 = Vector3Transform(v3, transform);
+            v4 = Vector3Transform(v4, transform);
+
+            // Add first triangle (v1, v2, v3)
+            mesh.vertices.push_back(v1);
+            mesh.vertices.push_back(v2);
+            mesh.vertices.push_back(v3);
             mesh.uvs.push_back({uv1.x, uv1.y});
-            mesh.vertices.push_back(
-                Vector3Transform({from.x, to.y, from.z}, transform));
             mesh.uvs.push_back({uv2.x, uv1.y});
-            mesh.vertices.push_back(
-                Vector3Transform({to.x, to.y, from.z}, transform));
             mesh.uvs.push_back({uv2.x, uv2.y});
-            mesh.vertices.push_back(
-                Vector3Transform({to.x, from.y, from.z}, transform));
+
+            // Add second triangle (v1, v3, v4)
+            mesh.vertices.push_back(v1);
+            mesh.vertices.push_back(v3);
+            mesh.vertices.push_back(v4);
+            mesh.uvs.push_back({uv1.x, uv1.y});
+            mesh.uvs.push_back({uv2.x, uv2.y});
             mesh.uvs.push_back({uv1.x, uv2.y});
-            mesh.vertices.push_back(
-                Vector3Transform({from.x, from.y, from.z}, transform));
           } else if (direction == "south") {
             // South face (+Z): Counter-clockwise from top-left
+            Vector3 v1 = {to.x, to.y, to.z};    // Top-left
+            Vector3 v2 = {from.x, to.y, to.z};  // Top-right
+            Vector3 v3 = {from.x, from.y, to.z}; // Bottom-right
+            Vector3 v4 = {to.x, from.y, to.z};  // Bottom-left
+
+            // Apply transformation
+            v1 = Vector3Transform(v1, transform);
+            v2 = Vector3Transform(v2, transform);
+            v3 = Vector3Transform(v3, transform);
+            v4 = Vector3Transform(v4, transform);
+
+            // Add triangles
+            mesh.vertices.push_back(v1);
+            mesh.vertices.push_back(v2);
+            mesh.vertices.push_back(v3);
             mesh.uvs.push_back({uv1.x, uv1.y});
-            mesh.vertices.push_back(
-                Vector3Transform({to.x, to.y, to.z}, transform));
             mesh.uvs.push_back({uv2.x, uv1.y});
-            mesh.vertices.push_back(
-                Vector3Transform({from.x, to.y, to.z}, transform));
             mesh.uvs.push_back({uv2.x, uv2.y});
-            mesh.vertices.push_back(
-                Vector3Transform({from.x, from.y, to.z}, transform));
-            mesh.uvs.push_back({uv1.x, uv2.y});
-            mesh.vertices.push_back(
-                Vector3Transform({to.x, from.y, to.z}, transform));
-          } else if (direction == "west") {
-            // West face (-X): Counter-clockwise from top-left
+
+            mesh.vertices.push_back(v1);
+            mesh.vertices.push_back(v3);
+            mesh.vertices.push_back(v4);
             mesh.uvs.push_back({uv1.x, uv1.y});
-            mesh.vertices.push_back(
-                Vector3Transform({from.x, to.y, to.z}, transform));
-            mesh.uvs.push_back({uv2.x, uv1.y});
-            mesh.vertices.push_back(
-                Vector3Transform({from.x, to.y, from.z}, transform));
             mesh.uvs.push_back({uv2.x, uv2.y});
-            mesh.vertices.push_back(
-                Vector3Transform({from.x, from.y, from.z}, transform));
             mesh.uvs.push_back({uv1.x, uv2.y});
-            mesh.vertices.push_back(
-                Vector3Transform({from.x, from.y, to.z}, transform));
           } else if (direction == "east") {
             // East face (+X): Counter-clockwise from top-left
+            Vector3 v1 = {to.x, to.y, from.z};  // Top-left
+            Vector3 v2 = {to.x, to.y, to.z};    // Top-right
+            Vector3 v3 = {to.x, from.y, to.z};  // Bottom-right
+            Vector3 v4 = {to.x, from.y, from.z}; // Bottom-left
+
+            // Apply transformation
+            v1 = Vector3Transform(v1, transform);
+            v2 = Vector3Transform(v2, transform);
+            v3 = Vector3Transform(v3, transform);
+            v4 = Vector3Transform(v4, transform);
+
+            // Add triangles
+            mesh.vertices.push_back(v1);
+            mesh.vertices.push_back(v2);
+            mesh.vertices.push_back(v3);
             mesh.uvs.push_back({uv1.x, uv1.y});
-            mesh.vertices.push_back(
-                Vector3Transform({to.x, to.y, from.z}, transform));
             mesh.uvs.push_back({uv2.x, uv1.y});
-            mesh.vertices.push_back(
-                Vector3Transform({to.x, to.y, to.z}, transform));
             mesh.uvs.push_back({uv2.x, uv2.y});
-            mesh.vertices.push_back(
-                Vector3Transform({to.x, from.y, to.z}, transform));
+
+            mesh.vertices.push_back(v1);
+            mesh.vertices.push_back(v3);
+            mesh.vertices.push_back(v4);
+            mesh.uvs.push_back({uv1.x, uv1.y});
+            mesh.uvs.push_back({uv2.x, uv2.y});
             mesh.uvs.push_back({uv1.x, uv2.y});
-            mesh.vertices.push_back(
-                Vector3Transform({to.x, from.y, from.z}, transform));
+          } else if (direction == "west") {
+            // West face (-X): Counter-clockwise from top-left
+            Vector3 v1 = {from.x, to.y, to.z};    // Top-left
+            Vector3 v2 = {from.x, to.y, from.z};  // Top-right
+            Vector3 v3 = {from.x, from.y, from.z}; // Bottom-right
+            Vector3 v4 = {from.x, from.y, to.z};  // Bottom-left
+
+            // Apply transformation
+            v1 = Vector3Transform(v1, transform);
+            v2 = Vector3Transform(v2, transform);
+            v3 = Vector3Transform(v3, transform);
+            v4 = Vector3Transform(v4, transform);
+
+            // Add triangles
+            mesh.vertices.push_back(v1);
+            mesh.vertices.push_back(v2);
+            mesh.vertices.push_back(v3);
+            mesh.uvs.push_back({uv1.x, uv1.y});
+            mesh.uvs.push_back({uv2.x, uv1.y});
+            mesh.uvs.push_back({uv2.x, uv2.y});
+
+            mesh.vertices.push_back(v1);
+            mesh.vertices.push_back(v3);
+            mesh.vertices.push_back(v4);
+            mesh.uvs.push_back({uv1.x, uv1.y});
+            mesh.uvs.push_back({uv2.x, uv2.y});
+            mesh.uvs.push_back({uv1.x, uv2.y});
           } else if (direction == "up") {
             // Up face (+Y): Counter-clockwise from top-left
+            Vector3 v1 = {from.x, to.y, from.z}; // Top-left
+            Vector3 v2 = {from.x, to.y, to.z};   // Top-right
+            Vector3 v3 = {to.x, to.y, to.z};     // Bottom-right
+            Vector3 v4 = {to.x, to.y, from.z};   // Bottom-left
+
+            // Apply transformation
+            v1 = Vector3Transform(v1, transform);
+            v2 = Vector3Transform(v2, transform);
+            v3 = Vector3Transform(v3, transform);
+            v4 = Vector3Transform(v4, transform);
+
+            // Add triangles
+            mesh.vertices.push_back(v1);
+            mesh.vertices.push_back(v2);
+            mesh.vertices.push_back(v3);
             mesh.uvs.push_back({uv1.x, uv1.y});
-            mesh.vertices.push_back(
-                Vector3Transform({from.x, to.y, from.z}, transform));
             mesh.uvs.push_back({uv1.x, uv2.y});
-            mesh.vertices.push_back(
-                Vector3Transform({from.x, to.y, to.z}, transform));
             mesh.uvs.push_back({uv2.x, uv2.y});
-            mesh.vertices.push_back(
-                Vector3Transform({to.x, to.y, to.z}, transform));
+
+            mesh.vertices.push_back(v1);
+            mesh.vertices.push_back(v3);
+            mesh.vertices.push_back(v4);
+            mesh.uvs.push_back({uv1.x, uv1.y});
+            mesh.uvs.push_back({uv2.x, uv2.y});
             mesh.uvs.push_back({uv2.x, uv1.y});
-            mesh.vertices.push_back(
-                Vector3Transform({to.x, to.y, from.z}, transform));
           } else if (direction == "down") {
             // Down face (-Y): Counter-clockwise from top-left
+            Vector3 v1 = {from.x, from.y, to.z};   // Top-left
+            Vector3 v2 = {from.x, from.y, from.z}; // Top-right
+            Vector3 v3 = {to.x, from.y, from.z};   // Bottom-right
+            Vector3 v4 = {to.x, from.y, to.z};     // Bottom-left
+
+            // Apply transformation
+            v1 = Vector3Transform(v1, transform);
+            v2 = Vector3Transform(v2, transform);
+            v3 = Vector3Transform(v3, transform);
+            v4 = Vector3Transform(v4, transform);
+
+            // Add triangles
+            mesh.vertices.push_back(v1);
+            mesh.vertices.push_back(v2);
+            mesh.vertices.push_back(v3);
             mesh.uvs.push_back({uv1.x, uv1.y});
-            mesh.vertices.push_back(
-                Vector3Transform({from.x, from.y, from.z}, transform));
-            mesh.uvs.push_back({uv2.x, uv1.y});
-            mesh.vertices.push_back(
-                Vector3Transform({to.x, from.y, from.z}, transform));
-            mesh.uvs.push_back({uv2.x, uv2.y});
-            mesh.vertices.push_back(
-                Vector3Transform({to.x, from.y, to.z}, transform));
             mesh.uvs.push_back({uv1.x, uv2.y});
-            mesh.vertices.push_back(
-                Vector3Transform({from.x, from.y, to.z}, transform));
+            mesh.uvs.push_back({uv2.x, uv2.y});
+
+            mesh.vertices.push_back(v1);
+            mesh.vertices.push_back(v3);
+            mesh.vertices.push_back(v4);
+            mesh.uvs.push_back({uv1.x, uv1.y});
+            mesh.uvs.push_back({uv2.x, uv2.y});
+            mesh.uvs.push_back({uv2.x, uv1.y});
           }
         }
       }
@@ -267,39 +346,15 @@ void Model::draw(const Vector3 &position, const Vector3 &rotation,
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.1f); // Discard pixels with alpha < 0.1
 
-    for (size_t i = 0; i < mesh.vertices.size(); i += 4) {
-      // Draw first triangle (vertices 0, 1, 2)
-      // DEV NOTE: You may think that calling rlBegin and rlEnd for every
-      // triangle is inefficient, but this is somehow literally the most
-      // efficient way to do it in raylib. If you try to batch more stuff,
-      // i.e. using just one pair of rlBegin/rlEnd for all triangles, it will be
-      // a lot slower. No, I do not know why.
-      // - Atirut
-      rlBegin(RL_TRIANGLES);
-      for (size_t j = 0; j < 3; ++j) {
-        rlTexCoord2f(mesh.uvs[i + j].x, mesh.uvs[i + j].y);
-        rlVertex3f(mesh.vertices[i + j].x, mesh.vertices[i + j].y,
-                   mesh.vertices[i + j].z);
-      }
-      rlEnd();
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-      // Draw second triangle (vertices 0, 2, 3)
-      rlBegin(RL_TRIANGLES);
-      // First vertex (0)
-      rlTexCoord2f(mesh.uvs[i].x, mesh.uvs[i].y);
-      rlVertex3f(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
+    glVertexPointer(3, GL_FLOAT, 0, mesh.vertices.data());
+    glTexCoordPointer(2, GL_FLOAT, 0, mesh.uvs.data());
+    glDrawArrays(GL_TRIANGLES, 0, mesh.vertices.size());
 
-      // Third vertex (2)
-      rlTexCoord2f(mesh.uvs[i + 2].x, mesh.uvs[i + 2].y);
-      rlVertex3f(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y,
-                 mesh.vertices[i + 2].z);
-
-      // Fourth vertex (3)
-      rlTexCoord2f(mesh.uvs[i + 3].x, mesh.uvs[i + 3].y);
-      rlVertex3f(mesh.vertices[i + 3].x, mesh.vertices[i + 3].y,
-                 mesh.vertices[i + 3].z);
-      rlEnd();
-    }
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
     // Disable alpha testing when done
     glDisable(GL_ALPHA_TEST);
