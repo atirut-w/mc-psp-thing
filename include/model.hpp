@@ -1,9 +1,9 @@
 #pragma once
 #include "resource_location.hpp"
+#include <raylib.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <raylib.h>
 
 namespace MCPSP {
 
@@ -22,8 +22,7 @@ class Model {
 public:
   Model(const MCPSP::ResourceLocation &location);
 
-  void draw(const Vector3 &position,
-            const Vector3 &rotation,
+  void draw(const Vector3 &position, const Vector3 &rotation,
             const Vector3 &scale);
 };
 

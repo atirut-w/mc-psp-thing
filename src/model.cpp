@@ -2,12 +2,12 @@
 #include "raylib.h"
 #include "resource_location.hpp"
 #include "texture_manager.hpp"
+#include <GL/gl.h>
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <raymath.h>
 #include <rlgl.h>
-#include <GL/gl.h>
 
 namespace MCPSP {
 
@@ -80,7 +80,8 @@ void Model::loadModel(const MCPSP::ResourceLocation &location) {
         } else {
           std::cerr << "Unknown rotation axis: " << axis << std::endl;
         }
-        transform = MatrixTranslate(-origin.x, -origin.y, -origin.z) * transform;
+        transform =
+            MatrixTranslate(-origin.x, -origin.y, -origin.z) * transform;
       }
 
       if (element.contains("faces")) {
@@ -107,20 +108,20 @@ void Model::loadModel(const MCPSP::ResourceLocation &location) {
               uv1 = {to.x, 1.0f - to.y};     // Top-right
               uv2 = {from.x, 1.0f - from.y}; // Bottom-left
             } else if (direction == "south") {
-              uv1 = {from.x, 1.0f - to.y};   // Top-left
-              uv2 = {to.x, 1.0f - from.y};   // Bottom-right
+              uv1 = {from.x, 1.0f - to.y}; // Top-left
+              uv2 = {to.x, 1.0f - from.y}; // Bottom-right
             } else if (direction == "west") {
               uv1 = {to.z, 1.0f - to.y};     // Top-right
               uv2 = {from.z, 1.0f - from.y}; // Bottom-left
             } else if (direction == "east") {
-              uv1 = {from.z, 1.0f - to.y};   // Top-left
-              uv2 = {to.z, 1.0f - from.y};   // Bottom-right
+              uv1 = {from.z, 1.0f - to.y}; // Top-left
+              uv2 = {to.z, 1.0f - from.y}; // Bottom-right
             } else if (direction == "up") {
-              uv1 = {from.x, from.z};        // Top-left
-              uv2 = {to.x, to.z};            // Bottom-right
+              uv1 = {from.x, from.z}; // Top-left
+              uv2 = {to.x, to.z};     // Bottom-right
             } else if (direction == "down") {
-              uv1 = {from.x, to.z};          // Top-left
-              uv2 = {to.x, from.z};          // Bottom-right
+              uv1 = {from.x, to.z}; // Top-left
+              uv2 = {to.x, from.z}; // Bottom-right
             }
           }
           std::swap(uv1.x, uv2.x);
@@ -261,11 +262,11 @@ void Model::draw(const Vector3 &position, const Vector3 &rotation,
     const Texture2D &texture =
         TextureManager::getTexture(resolveTexture(tpath));
     rlSetTexture(texture.id);
-    
+
     // Enable alpha testing for transparency
     glEnable(GL_ALPHA_TEST);
-    glAlphaFunc(GL_GREATER, 0.1f);  // Discard pixels with alpha < 0.1
-    
+    glAlphaFunc(GL_GREATER, 0.1f); // Discard pixels with alpha < 0.1
+
     for (size_t i = 0; i < mesh.vertices.size(); i += 4) {
       // Draw first triangle (vertices 0, 1, 2)
       // DEV NOTE: You may think that calling rlBegin and rlEnd for every
@@ -281,23 +282,25 @@ void Model::draw(const Vector3 &position, const Vector3 &rotation,
                    mesh.vertices[i + j].z);
       }
       rlEnd();
-      
+
       // Draw second triangle (vertices 0, 2, 3)
       rlBegin(RL_TRIANGLES);
       // First vertex (0)
       rlTexCoord2f(mesh.uvs[i].x, mesh.uvs[i].y);
       rlVertex3f(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
-      
+
       // Third vertex (2)
       rlTexCoord2f(mesh.uvs[i + 2].x, mesh.uvs[i + 2].y);
-      rlVertex3f(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y, mesh.vertices[i + 2].z);
-      
+      rlVertex3f(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y,
+                 mesh.vertices[i + 2].z);
+
       // Fourth vertex (3)
       rlTexCoord2f(mesh.uvs[i + 3].x, mesh.uvs[i + 3].y);
-      rlVertex3f(mesh.vertices[i + 3].x, mesh.vertices[i + 3].y, mesh.vertices[i + 3].z);
+      rlVertex3f(mesh.vertices[i + 3].x, mesh.vertices[i + 3].y,
+                 mesh.vertices[i + 3].z);
       rlEnd();
     }
-    
+
     // Disable alpha testing when done
     glDisable(GL_ALPHA_TEST);
     rlSetTexture(0);

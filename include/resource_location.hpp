@@ -24,9 +24,7 @@ public:
     return "umd0:/assets/" + ns + "/" + ctx + "/" + path;
   }
 
-  operator std::string() const {
-    return ns + ":" + path;
-  }
+  operator std::string() const { return ns + ":" + path; }
 };
 
 } // namespace MCPSP
