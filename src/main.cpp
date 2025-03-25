@@ -1,4 +1,5 @@
 #include "model.hpp"
+#include <cmath>
 #include <pspctrl.h>
 #include <pspdisplay.h>
 #include <pspkernel.h>
@@ -9,7 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <cmath>
 
 PSP_MODULE_INFO("GLTest", 0, 1, 1);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER | PSP_THREAD_ATTR_VFPU);
@@ -20,15 +20,19 @@ Camera3D camera = {
 };
 
 std::vector<MCPSP::Model> models = {
-  MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_acacia_sapling")),
-  MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_bamboo")),
-  MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_birch_sapling")),
-  MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_blue_orchid")),
-  MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_cactus")),
-  MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_cornflower")),
-  MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_dandelion")),
-  MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_dark_oak_sapling")),
-  MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_fern")),
+    MCPSP::Model(
+        MCPSP::ResourceLocation("minecraft:block/potted_acacia_sapling")),
+    MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_bamboo")),
+    MCPSP::Model(
+        MCPSP::ResourceLocation("minecraft:block/potted_birch_sapling")),
+    MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_blue_orchid")),
+    MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_cactus")),
+    MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_cornflower")),
+    MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_dandelion")),
+    MCPSP::Model(
+        MCPSP::ResourceLocation("minecraft:block/potted_dark_oak_sapling")),
+    MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_fern")),
+    MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/oak_stairs")),
 };
 
 int exitCallback(int arg1, int arg2, void *common) {
@@ -63,19 +67,20 @@ void DrawTextf(const char *text, int posX, int posY, int fontSize, Color color,
 }
 
 void drawModels() {
-  int gridSize = (int)sqrt(models.size()) + (sqrt(models.size()) == (int)sqrt(models.size()) ? 0 : 1);
-  
+  int gridSize = (int)sqrt(models.size()) +
+                 (sqrt(models.size()) == (int)sqrt(models.size()) ? 0 : 1);
+
   // Calculate the starting position to center the grid
   float startX = -((gridSize - 1) * 2.0f) / 2.0f;
   float startZ = -((gridSize - 1) * 2.0f) / 2.0f;
-  
+
   for (int i = 0; i < models.size(); i++) {
     int row = i / gridSize;
     int col = i % gridSize;
-    
+
     float x = startX + col * 2.0f;
     float z = startZ + row * 2.0f;
-    
+
     models[i].draw({x, 0.0f, z}, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f});
   }
 }

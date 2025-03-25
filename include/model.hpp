@@ -1,42 +1,20 @@
 #pragma once
 #include "resource_location.hpp"
-#include <array>
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <raylib.h>
 
 namespace MCPSP {
 
-struct ModelRotation {
-  std::array<float, 3> origin = {0.0f, 0.0f, 0.0f};
-  std::string axis = "x";
-  float angle = 0.0f;
-  bool rescale = false;
-};
-
-struct ModelUV {
-  std::array<float, 2> from;
-  std::array<float, 2> to;
-};
-
-struct ModelFace {
-  ModelUV uv;
-  std::string texture;
-  std::string cullface;
-  int rotation = 0;
-  bool tintindex = false;
-};
-
-struct ModelElement {
-  std::array<float, 3> from;
-  std::array<float, 3> to;
-  ModelRotation rotation;
-  std::unordered_map<std::string, ModelFace> faces;
+struct Mesh {
+  std::vector<Vector3> vertices;
+  std::vector<Vector2> uvs;
 };
 
 class Model {
   std::unordered_map<std::string, std::string> textures;
-  std::vector<ModelElement> elements;
+  std::unordered_map<std::string, Mesh> meshes;
 
   void loadModel(const MCPSP::ResourceLocation &location);
   ResourceLocation resolveTexture(const std::string &texture);
@@ -44,9 +22,9 @@ class Model {
 public:
   Model(const MCPSP::ResourceLocation &location);
 
-  void draw(const std::array<float, 3> &position,
-            const std::array<float, 3> &rotation,
-            const std::array<float, 3> &scale);
+  void draw(const Vector3 &position,
+            const Vector3 &rotation,
+            const Vector3 &scale);
 };
 
 } // namespace MCPSP
