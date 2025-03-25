@@ -139,7 +139,7 @@ void drawScene() {
   EndMode3D();
 }
 
-int main(int argc, char *argv[]) {
+int main_handled(int argc, char *argv[]) {
   setupCallbacks();
 
   InitWindow(480, 272, "Minecraft PSP Thing");
@@ -161,4 +161,31 @@ int main(int argc, char *argv[]) {
   }
 
   return 0;
+}
+
+int main(int argc, char *argv[]) {
+  try {
+    return main_handled(argc, argv);
+  } catch (const std::exception &e) {
+    pspDebugScreenInit();
+    pspDebugScreenPrintf("UNHANDLED C++ EXCEPTION\n\n");
+    pspDebugScreenPrintf("Exception: %s\n\n", e.what());
+
+    unsigned int stackTrace[16];
+    unsigned int frames = pspDebugGetStackTrace(stackTrace, 16);
+    pspDebugScreenPrintf("Stack trace (%u frames):\n", frames);
+    for (unsigned int i = 0; i < frames; i++) {
+      pspDebugScreenPrintf("\t[%2u] 0x%08X\n", i, stackTrace[i]);
+    }
+
+    pspDebugScreenPrintf("\nPress X to exit.\n");
+    while (1) {
+      SceCtrlData pad;
+      sceCtrlReadBufferPositive(&pad, 1);
+      if (pad.Buttons & PSP_CTRL_CROSS) {
+        break;
+      }
+      sceDisplayWaitVblankStart();
+    }
+  }
 }

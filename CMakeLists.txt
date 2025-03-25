@@ -23,6 +23,7 @@ target_link_libraries(gltest.elf PRIVATE
     pspdisplay
     pspvfpu
     pspctrl
+    pspdebug
 )
 
 add_custom_target(fixup-imports
