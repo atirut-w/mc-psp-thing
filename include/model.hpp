@@ -11,6 +11,7 @@ struct ModelFace {
   Vector2 uv1;
   Vector2 uv2;
   std::string texture;
+  std::string cullface = "";
   int rotation = 0;
   int tintindex = -1;
 };

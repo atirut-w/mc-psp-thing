@@ -117,6 +117,10 @@ void Model::loadModel(const MCPSP::ResourceLocation &location) {
             modelFace.texture = face["texture"];
           }
 
+          if (face.contains("cullface")) {
+            modelFace.cullface = face["cullface"];
+          }
+
           if (face.contains("rotation")) {
             modelFace.rotation = face["rotation"];
           }

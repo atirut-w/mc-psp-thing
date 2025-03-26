@@ -56,6 +56,36 @@ void Chunk::generateBlockMesh(const BlockState &blockState, Vector3 position) {
 
     // Generate mesh for each face
     for (const auto &[direction, face] : element.faces) {
+      // Skip face if it should be culled based on the cullface property
+      if (!face.cullface.empty()) {
+        bool shouldCull = false;
+        
+        // Determine neighboring block position based on cullface direction
+        int nx = position.x;
+        int ny = position.y;
+        int nz = position.z;
+        
+        if (face.cullface == "north") nz -= 1;
+        else if (face.cullface == "south") nz += 1;
+        else if (face.cullface == "east") nx += 1;
+        else if (face.cullface == "west") nx -= 1;
+        else if (face.cullface == "up") ny += 1;
+        else if (face.cullface == "down") ny -= 1;
+        
+        // Check if neighboring position is within chunk boundaries
+        if (nx >= 0 && nx < 16 && ny >= 0 && ny < 16 && nz >= 0 && nz < 16) {
+          // Check if neighboring block is solid (not air)
+          if (blocks[nx][ny][nz].block != ResourceLocation("minecraft:air")) {
+            shouldCull = true;
+          }
+        }
+        
+        // Skip this face if it's culled
+        if (shouldCull) {
+          continue;
+        }
+      }
+      
       if (meshes.find(face.texture) == meshes.end()) {
         meshes[face.texture] = Mesh();
       }
