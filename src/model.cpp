@@ -319,15 +319,15 @@ void Model::loadModel(const MCPSP::ResourceLocation &location) {
   }
 }
 
-ResourceLocation Model::resolveTexture(const std::string &texture) {
+ResourceLocation Model::resolveTexture(const std::string &texture) const {
   if (texture.find("#") != std::string::npos) {
-    return resolveTexture(textures[texture.substr(1)]);
+    return resolveTexture(textures.at(texture.substr(1)));
   }
   return ResourceLocation(texture);
 }
 
 void Model::draw(const Vector3 &position, const Vector3 &rotation,
-                 const Vector3 &scale) {
+                 const Vector3 &scale) const {
   rlPushMatrix();
   rlTranslatef(position.x, position.y, position.z);
   rlRotatef(rotation.x, 1.0f, 0.0f, 0.0f);

@@ -10,6 +10,7 @@ add_executable(gltest.elf
     src/model.cpp
     src/texture_manager.cpp
     src/block_registry.cpp
+    src/chunk.cpp
 )
 target_include_directories(gltest.elf PRIVATE
     include

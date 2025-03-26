@@ -17,14 +17,14 @@ class Model {
   std::unordered_map<std::string, Mesh> meshes;
 
   void loadModel(const MCPSP::ResourceLocation &location);
-  ResourceLocation resolveTexture(const std::string &texture);
+  ResourceLocation resolveTexture(const std::string &texture) const;
 
 public:
   Model() = default;
   Model(const MCPSP::ResourceLocation &location);
 
   void draw(const Vector3 &position, const Vector3 &rotation,
-            const Vector3 &scale);
+            const Vector3 &scale) const;
 };
 
 } // namespace MCPSP
