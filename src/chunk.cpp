@@ -1,5 +1,6 @@
 #include "chunk.hpp"
 #include "block_registry.hpp"
+#include "resource_location.hpp"
 #include "rlgl.h"
 #include "texture_manager.hpp"
 #include <GL/gl.h>
@@ -86,10 +87,11 @@ void Chunk::generateBlockMesh(const BlockState &blockState, Vector3 position) {
         }
       }
       
-      if (meshes.find(face.texture) == meshes.end()) {
-        meshes[face.texture] = Mesh();
+      ResourceLocation texture = model.resolveTexture(face.texture);
+      if (meshes.find(texture) == meshes.end()) {
+        meshes[texture] = Mesh();
       }
-      Mesh &mesh = meshes[face.texture];
+      Mesh &mesh = meshes[texture];
 
       Vector2 uv1 = face.uv1;
       Vector2 uv2 = face.uv2;
@@ -332,15 +334,7 @@ void Chunk::draw(const Vector3 &position) {
   rlTranslatef(position.x, position.y, position.z);
 
   for (const auto &[texture, mesh] : meshes) {
-    // Resolve texture path from texture variables
-    ResourceLocation textureLoc = ResourceLocation(texture);
-    if (texture.find("#") != std::string::npos) {
-      // This is a texture variable reference, resolve it using the block model
-      const Block &block = BlockRegistry::getBlock(blocks[0][0][0].block);
-      textureLoc = block.model.resolveTexture(texture);
-    }
-    
-    const Texture2D &tex = TextureManager::getTexture(textureLoc);
+    const Texture2D &tex = TextureManager::getTexture(texture);
     rlSetTexture(tex.id);
 
     // Enable alpha testing for transparency
