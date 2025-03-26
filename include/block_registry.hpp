@@ -13,6 +13,9 @@ public:
   static void registerBlock(const ResourceLocation &location,
                             const Block &block);
   static const Block &getBlock(const ResourceLocation &location);
+  static const std::unordered_map<std::string, Block> &getBlocks() {
+    return blocks;
+  }
 };
 
 } // namespace MCPSP

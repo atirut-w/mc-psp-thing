@@ -14,7 +14,7 @@ struct Mesh {
 };
 
 struct BlockState {
-  ResourceLocation block = ResourceLocation("minecraft:oak_planks");
+  ResourceLocation block = ResourceLocation("minecraft:air");
 };
 
 class Chunk {
@@ -28,6 +28,11 @@ class Chunk {
 
 public:
   Chunk();
+
+  void setBlock(int x, int y, int z, const ResourceLocation &block) {
+    blocks[x][y][z].block = block;
+    dirty = true;
+  }
 
   void draw(const Vector3 &position);
 };
