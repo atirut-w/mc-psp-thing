@@ -20,6 +20,7 @@ class Model {
   ResourceLocation resolveTexture(const std::string &texture);
 
 public:
+  Model() = default;
   Model(const MCPSP::ResourceLocation &location);
 
   void draw(const Vector3 &position, const Vector3 &rotation,
