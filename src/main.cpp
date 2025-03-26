@@ -1,4 +1,7 @@
+#include "block_registry.hpp"
+#include "chunk.hpp"
 #include "model.hpp"
+#include "resource_location.hpp"
 #include <cmath>
 #include <pspctrl.h>
 #include <pspdisplay.h>
@@ -15,11 +18,12 @@ PSP_MODULE_INFO("GLTest", 0, 1, 1);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER | PSP_THREAD_ATTR_VFPU);
 
 Camera3D camera = {
-    {10.0f, 10.0f, 10.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, 45.0f,
+    {32.0f, 32.0f, 32.0f}, {8.0f, 8.0f, 8.0f}, {0.0f, 1.0f, 0.0f}, 45.0f,
     CAMERA_PERSPECTIVE,
 };
 
 std::vector<MCPSP::Model> models;
+MCPSP::Chunk chunk;
 
 int exitCallback(int arg1, int arg2, void *common) {
   sceKernelExitGame();
@@ -67,7 +71,7 @@ void drawModels() {
     float x = startX + col * 2.0f;
     float z = startZ + row * 2.0f;
 
-    models[i].draw({x, 0.0f, z}, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f});
+    // models[i].draw({x, 0.0f, z}, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f});
   }
 }
 
@@ -77,80 +81,88 @@ void drawScene() {
   // Draw a grid
   DrawGrid(10, 1.0f);
 
-  drawModels();
+  chunk.draw({0.0f, 0.0f, 0.0f});
 
   EndMode3D();
 }
 
 void load() {
-  models = {
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_acacia_sapling")),
-      MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_allium")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_azalea_bush")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_azure_bluet")),
-      MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_bamboo")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_birch_sapling")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_blue_orchid")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_brown_mushroom")),
-      MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_cactus")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_cherry_sapling")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_closed_eyeblossom")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_cornflower")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_crimson_fungus")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_crimson_roots")),
-      MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_dandelion")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_dark_oak_sapling")),
-      MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_dead_bush")),
-      MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_fern")),
-      MCPSP::Model(MCPSP::ResourceLocation(
-          "minecraft:block/potted_flowering_azalea_bush")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_jungle_sapling")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_lily_of_the_valley")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_mangrove_propagule")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_oak_sapling")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_open_eyeblossom")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_orange_tulip")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_oxeye_daisy")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_pale_oak_sapling")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_pink_tulip")),
-      MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_poppy")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_red_mushroom")),
-      MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_red_tulip")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_spruce_sapling")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_torchflower")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_warped_fungus")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_warped_roots")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_white_tulip")),
-      MCPSP::Model(
-          MCPSP::ResourceLocation("minecraft:block/potted_wither_rose")),
-  };
+  // models = {
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_acacia_sapling")),
+  //     MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_allium")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_azalea_bush")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_azure_bluet")),
+  //     MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_bamboo")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_birch_sapling")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_blue_orchid")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_brown_mushroom")),
+  //     MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_cactus")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_cherry_sapling")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_closed_eyeblossom")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_cornflower")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_crimson_fungus")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_crimson_roots")),
+  //     MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_dandelion")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_dark_oak_sapling")),
+  //     MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_dead_bush")),
+  //     MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_fern")),
+  //     MCPSP::Model(MCPSP::ResourceLocation(
+  //         "minecraft:block/potted_flowering_azalea_bush")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_jungle_sapling")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_lily_of_the_valley")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_mangrove_propagule")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_oak_sapling")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_open_eyeblossom")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_orange_tulip")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_oxeye_daisy")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_pale_oak_sapling")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_pink_tulip")),
+  //     MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_poppy")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_red_mushroom")),
+  //     MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/potted_red_tulip")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_spruce_sapling")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_torchflower")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_warped_fungus")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_warped_roots")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_white_tulip")),
+  //     MCPSP::Model(
+  //         MCPSP::ResourceLocation("minecraft:block/potted_wither_rose")),
+  // };
+  MCPSP::BlockRegistry::registerBlock(
+      MCPSP::ResourceLocation("minecraft:oak_planks"),
+      MCPSP::Block{
+          MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/oak_planks"))});
+  MCPSP::BlockRegistry::registerBlock(
+      MCPSP::ResourceLocation("minecraft:oak_stairs"),
+      MCPSP::Block{
+          MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/oak_stairs"))});
 }
 
 int main_handled(int argc, char *argv[]) {
