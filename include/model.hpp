@@ -7,24 +7,39 @@
 
 namespace MCPSP {
 
-struct Mesh {
-  std::vector<Vector3> vertices;
-  std::vector<Vector2> uvs;
+struct ModelFace {
+  Vector2 uv1;
+  Vector2 uv2;
+  std::string texture;
+  int rotation = 0;
+  int tintindex = -1;
+};
+
+struct ElementRotation {
+  Vector3 origin = {0, 0, 0};
+  std::string axis = "x";
+  float angle = 0.0f;
+};
+
+struct ModelElement {
+  Vector3 from;
+  Vector3 to;
+  ElementRotation rotation;
+  std::unordered_map<std::string, ModelFace> faces;
 };
 
 class Model {
   std::unordered_map<std::string, std::string> textures;
-  std::unordered_map<std::string, Mesh> meshes;
+  std::vector<ModelElement> elements;
 
   void loadModel(const MCPSP::ResourceLocation &location);
-  ResourceLocation resolveTexture(const std::string &texture) const;
 
 public:
   Model() = default;
   Model(const MCPSP::ResourceLocation &location);
 
-  void draw(const Vector3 &position, const Vector3 &rotation,
-            const Vector3 &scale) const;
+  const std::vector<ModelElement> &getElements() const { return elements; }
+  ResourceLocation resolveTexture(const std::string &texture) const;
 };
 
 } // namespace MCPSP

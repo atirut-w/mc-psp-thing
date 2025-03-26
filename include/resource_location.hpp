@@ -25,6 +25,10 @@ public:
   }
 
   operator std::string() const { return ns + ":" + path; }
+
+  bool operator!=(const ResourceLocation &other) const {
+    return ns != other.ns || path != other.path;
+  }
 };
 
 } // namespace MCPSP

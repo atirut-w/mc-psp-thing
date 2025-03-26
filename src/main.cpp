@@ -71,7 +71,7 @@ void drawModels() {
     float x = startX + col * 2.0f;
     float z = startZ + row * 2.0f;
 
-    models[i].draw({x, 0.0f, z}, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f});
+    // models[i].draw({x, 0.0f, z}, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f});
   }
 }
 
@@ -159,6 +159,10 @@ void load() {
       MCPSP::ResourceLocation("minecraft:oak_planks"),
       MCPSP::Block{
           MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/oak_planks"))});
+  MCPSP::BlockRegistry::registerBlock(
+      MCPSP::ResourceLocation("minecraft:oak_stairs"),
+      MCPSP::Block{
+          MCPSP::Model(MCPSP::ResourceLocation("minecraft:block/oak_stairs"))});
 }
 
 int main_handled(int argc, char *argv[]) {
