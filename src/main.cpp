@@ -18,7 +18,7 @@ PSP_MODULE_INFO("GLTest", 0, 1, 1);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER | PSP_THREAD_ATTR_VFPU);
 
 Camera3D camera = {
-    {10.0f, 10.0f, 10.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, 45.0f,
+    {32.0f, 32.0f, 32.0f}, {8.0f, 8.0f, 8.0f}, {0.0f, 1.0f, 0.0f}, 45.0f,
     CAMERA_PERSPECTIVE,
 };
 
