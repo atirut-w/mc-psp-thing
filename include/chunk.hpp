@@ -18,7 +18,7 @@ struct BlockState {
 };
 
 class Chunk {
-  std::array<std::array<std::array<BlockState, 16>, 16>, 16> blocks;
+  std::array<std::array<std::array<BlockState, 16>, 64>, 16> blocks;
 
   std::unordered_map<std::string, Mesh> meshes;
   bool dirty = true;

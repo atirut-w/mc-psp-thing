@@ -14,7 +14,7 @@ void Chunk::generateMesh() {
   meshes.clear();
 
   for (int x = 0; x < 16; ++x) {
-    for (int y = 0; y < 16; ++y) {
+    for (int y = 0; y < 64; ++y) {
       for (int z = 0; z < 16; ++z) {
         BlockState &blockState = blocks[x][y][z];
         if (blockState.block != ResourceLocation("minecraft:air")) {
@@ -74,7 +74,7 @@ void Chunk::generateBlockMesh(const BlockState &blockState, Vector3 position) {
         else if (face.cullface == "down") ny -= 1;
         
         // Check if neighboring position is within chunk boundaries
-        if (nx >= 0 && nx < 16 && ny >= 0 && ny < 16 && nz >= 0 && nz < 16) {
+        if (nx >= 0 && nx < 16 && ny >= 0 && ny < 64 && nz >= 0 && nz < 16) {
           // Check if neighboring block is solid (not air)
           if (blocks[nx][ny][nz].block != ResourceLocation("minecraft:air")) {
             shouldCull = true;
