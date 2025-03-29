@@ -13,6 +13,7 @@ class World;
 struct Mesh {
   std::vector<Vector3> vertices;
   std::vector<Vector2> uvs;
+  std::vector<Color> colors;
 };
 
 struct BlockState {

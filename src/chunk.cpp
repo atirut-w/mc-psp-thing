@@ -1,5 +1,6 @@
 #include "chunk.hpp"
 #include "block_registry.hpp"
+#include "raylib.h"
 #include "resource_location.hpp"
 #include "rlgl.h"
 #include "texture_manager.hpp"
@@ -8,6 +9,14 @@
 #include <raymath.h>
 
 namespace MCPSP {
+
+// TODO: Not hardcode tint colors
+static Color tint_colors[] = {
+    {0x91, 0xbd, 0x59, 255}, // Grass
+    {0x77, 0xab, 0x2f, 255}, // Foliage
+    {0xa3, 0x75, 0x46, 255}, // Dry Foliage
+    {0x3f, 0x76, 0xe4, 255}, // Water
+};
 
 void Chunk::generateMesh() {
   meshes.clear();
@@ -165,6 +174,17 @@ void Chunk::generateBlockMesh(const BlockState &blockState, Vector3 position) {
 
       Vector2 uv1 = face.uv1;
       Vector2 uv2 = face.uv2;
+      Color tint_color;
+      if (face.tintindex != -1) {
+        // Use the tint color based on the tintindex
+        if (face.tintindex >= 0 && face.tintindex < 4) {
+          tint_color = tint_colors[face.tintindex];
+        } else {
+          tint_color = WHITE; // Default to white if index is out of bounds
+        }
+      } else {
+        tint_color = WHITE; // Default to white if no tint index
+      }
 
       // Apply face rotation if specified
       if (face.rotation != 0) {
@@ -390,6 +410,14 @@ void Chunk::generateBlockMesh(const BlockState &blockState, Vector3 position) {
         mesh.uvs.push_back({uv2.x, uv2.y});
         mesh.uvs.push_back({uv2.x, uv1.y});
       }
+
+      // Set color for the mesh
+      mesh.colors.push_back(tint_color);
+      mesh.colors.push_back(tint_color);
+      mesh.colors.push_back(tint_color);
+      mesh.colors.push_back(tint_color);
+      mesh.colors.push_back(tint_color);
+      mesh.colors.push_back(tint_color);
     }
   }
 }
@@ -413,13 +441,16 @@ void Chunk::draw(const Vector3 &position) {
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
 
     glVertexPointer(3, GL_FLOAT, 0, mesh.vertices.data());
     glTexCoordPointer(2, GL_FLOAT, 0, mesh.uvs.data());
+    glColorPointer(4, GL_UNSIGNED_BYTE, 0, mesh.colors.data());
     glDrawArrays(GL_TRIANGLES, 0, mesh.vertices.size());
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
 
     // Disable alpha testing when done
     glDisable(GL_ALPHA_TEST);
