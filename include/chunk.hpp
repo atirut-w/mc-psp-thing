@@ -8,6 +8,8 @@
 
 namespace MCPSP {
 
+class World;
+
 struct Mesh {
   std::vector<Vector3> vertices;
   std::vector<Vector2> uvs;
@@ -18,6 +20,7 @@ struct BlockState {
 };
 
 class Chunk {
+  World* world;
   std::array<std::array<std::array<BlockState, 16>, 64>, 16> blocks;
 
   std::unordered_map<std::string, Mesh> meshes;
@@ -27,7 +30,8 @@ class Chunk {
   void generateBlockMesh(const BlockState &blockState, Vector3 position);
 
 public:
-  Chunk();
+  Chunk() = default;
+  Chunk(World* world) : world(world) {};
 
   void setBlock(int x, int y, int z, const ResourceLocation &block) {
     blocks[x][y][z].block = block;

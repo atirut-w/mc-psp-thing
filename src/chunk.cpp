@@ -8,8 +8,6 @@
 
 namespace MCPSP {
 
-Chunk::Chunk() {}
-
 void Chunk::generateMesh() {
   meshes.clear();
 
