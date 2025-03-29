@@ -3,6 +3,7 @@
 #include "resource_location.hpp"
 #include "rlgl.h"
 #include "texture_manager.hpp"
+#include "world.hpp"
 #include <GL/gl.h>
 #include <raymath.h>
 
@@ -29,19 +30,24 @@ void Chunk::generateBlockMesh(const BlockState &blockState, Vector3 position) {
   const Block &block = BlockRegistry::getBlock(blockState.block);
   const Model &model = block.model;
 
+  // Extract block coordinates within this chunk
+  int blockX = static_cast<int>(position.x);
+  int blockY = static_cast<int>(position.y);
+  int blockZ = static_cast<int>(position.z);
+
   for (const auto &element : model.getElements()) {
     Vector3 from = element.from;
     Vector3 to = element.to;
 
     Matrix transform = MatrixIdentity();
-    
+
     // Apply element rotation if specified
     if (element.rotation.angle != 0.0f) {
       Vector3 origin = element.rotation.origin;
-      
+
       // Apply rotation around the specified axis
       transform = MatrixTranslate(origin.x, origin.y, origin.z) * transform;
-      
+
       if (element.rotation.axis == "x") {
         transform = MatrixRotateX(element.rotation.angle * DEG2RAD) * transform;
       } else if (element.rotation.axis == "y") {
@@ -49,7 +55,7 @@ void Chunk::generateBlockMesh(const BlockState &blockState, Vector3 position) {
       } else if (element.rotation.axis == "z") {
         transform = MatrixRotateZ(element.rotation.angle * DEG2RAD) * transform;
       }
-      
+
       transform = MatrixTranslate(-origin.x, -origin.y, -origin.z) * transform;
     }
 
@@ -58,33 +64,99 @@ void Chunk::generateBlockMesh(const BlockState &blockState, Vector3 position) {
       // Skip face if it should be culled based on the cullface property
       if (!face.cullface.empty()) {
         bool shouldCull = false;
-        
+
         // Determine neighboring block position based on cullface direction
-        int nx = position.x;
-        int ny = position.y;
-        int nz = position.z;
-        
-        if (face.cullface == "north") nz -= 1;
-        else if (face.cullface == "south") nz += 1;
-        else if (face.cullface == "east") nx += 1;
-        else if (face.cullface == "west") nx -= 1;
-        else if (face.cullface == "up") ny += 1;
-        else if (face.cullface == "down") ny -= 1;
-        
-        // Check if neighboring position is within chunk boundaries
+        int nx = blockX;
+        int ny = blockY;
+        int nz = blockZ;
+
+        if (face.cullface == "north")
+          nz -= 1;
+        else if (face.cullface == "south")
+          nz += 1;
+        else if (face.cullface == "east")
+          nx += 1;
+        else if (face.cullface == "west")
+          nx -= 1;
+        else if (face.cullface == "up")
+          ny += 1;
+        else if (face.cullface == "down")
+          ny -= 1;
+
+        // Check if neighboring position is within this chunk
         if (nx >= 0 && nx < 16 && ny >= 0 && ny < 64 && nz >= 0 && nz < 16) {
-          // Check if neighboring block is solid (not air)
+          // Check if neighboring block in this chunk is solid (not air)
           if (blocks[nx][ny][nz].block != ResourceLocation("minecraft:air")) {
             shouldCull = true;
           }
         }
-        
+        // If the neighbor is outside this chunk's boundaries, check neighboring
+        // chunks
+        else {
+          // Calculate which neighboring chunk to check and local coordinates
+          // within that chunk
+          int chunkOffsetX = 0;
+          int chunkOffsetZ = 0;
+          int localX = nx;
+          int localZ = nz;
+
+          // Handle x-axis chunk boundaries
+          if (nx < 0) {
+            chunkOffsetX = -1;
+            localX = 15; // Wrap to the far edge of the neighboring chunk
+          } else if (nx >= 16) {
+            chunkOffsetX = 1;
+            localX = 0; // Wrap to the near edge of the neighboring chunk
+          }
+
+          // Handle z-axis chunk boundaries
+          if (nz < 0) {
+            chunkOffsetZ = -1;
+            localZ = 15; // Wrap to the far edge of the neighboring chunk
+          } else if (nz >= 16) {
+            chunkOffsetZ = 1;
+            localZ = 0; // Wrap to the near edge of the neighboring chunk
+          }
+
+          // Only check neighboring chunks if we're at a horizontal boundary
+          // (y-axis doesn't cross chunks)
+          if (chunkOffsetX != 0 || chunkOffsetZ != 0) {
+            // If world is available, check the neighboring chunk
+            if (world != nullptr) {
+              // Calculate the actual chunk coordinates
+              int neighborChunkX = chunkX + chunkOffsetX;
+              int neighborChunkZ = chunkZ + chunkOffsetZ;
+
+              // Get the neighboring chunk from the world
+              const Chunk *neighborChunk =
+                  world->getChunk(neighborChunkX, neighborChunkZ);
+
+              if (neighborChunk != nullptr) {
+                // Check the block in the neighboring chunk
+                BlockState neighborBlock =
+                    neighborChunk->getBlock(localX, ny, localZ);
+                if (neighborBlock.block != ResourceLocation("minecraft:air")) {
+                  shouldCull = true;
+                }
+              } else {
+                // If the neighboring chunk doesn't exist, we probably can't
+                // see the edge anyway. Set to false for out-of-bounds view
+                shouldCull = false;
+              }
+            }
+          } else if (ny < 0 || ny >= 64) {
+            // For y-axis boundaries, simply treat out-of-bounds as air
+            // (could be modified for future vertical chunk support)
+            shouldCull = false;
+          }
+        }
+
         // Skip this face if it's culled
         if (shouldCull) {
           continue;
         }
       }
-      
+
       ResourceLocation texture = model.resolveTexture(face.texture);
       if (meshes.find(texture) == meshes.end()) {
         meshes[texture] = Mesh();

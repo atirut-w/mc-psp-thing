@@ -40,6 +40,20 @@ public:
       chunk.draw(position);
     }
   }
+
+  bool hasChunk(int x, int z) const {
+    ChunkPosition pos{x, z};
+    return chunks.find(pos) != chunks.end();
+  }
+
+  const Chunk *getChunk(int x, int z) const {
+    ChunkPosition pos{x, z};
+    auto it = chunks.find(pos);
+    if (it != chunks.end()) {
+      return &it->second;
+    }
+    return nullptr;
+  }
 };
 
 } // namespace MCPSP

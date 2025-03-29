@@ -5,12 +5,12 @@ namespace MCPSP {
 
 void World::generateChunk(int x, int z) {
   ChunkPosition pos{x, z};
-  
+
   if (chunks.find(pos) == chunks.end()) {
-    chunks[pos] = Chunk(this);
+    chunks[pos] = Chunk(this, x, z);
   }
-  
-  Chunk& chunk = chunks[pos];
+
+  Chunk &chunk = chunks[pos];
 
   // TODO: More advanced terrain generation
   for (int i = 0; i < 16; ++i) {
@@ -30,4 +30,4 @@ void World::generateChunk(int x, int z) {
   }
 }
 
-}
+} // namespace MCPSP
