@@ -1,12 +1,17 @@
 #pragma once
 #include <filesystem>
 #include <string>
+#include <functional>
 
 namespace MCPSP {
 
 class ResourceLocation {
-  std::string ns;
-  std::string path;
+    std::string ns;
+    std::string path;
+  
+  public:
+    const std::string &getNamespace() const { return ns; }
+    const std::string &getPath() const { return path; }
 
 public:
   ResourceLocation(const std::string &nid) {
@@ -26,9 +31,22 @@ public:
 
   operator std::string() const { return ns + ":" + path; }
 
+  bool operator==(const ResourceLocation &other) const {
+    return ns == other.ns && path == other.path;
+  }
+
   bool operator!=(const ResourceLocation &other) const {
     return ns != other.ns || path != other.path;
   }
 };
 
 } // namespace MCPSP
+
+namespace std {
+template <> struct hash<MCPSP::ResourceLocation> {
+  std::size_t operator()(const MCPSP::ResourceLocation &loc) const noexcept {
+    return std::hash<std::string>()(loc.getNamespace()) ^
+           (std::hash<std::string>()(loc.getPath()) << 1);
+  }
+};
+} // namespace std

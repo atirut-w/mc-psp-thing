@@ -1,9 +1,10 @@
 #include "block_registry.hpp"
+#include "resource_location.hpp"
 #include <string>
 
 namespace MCPSP {
 
-std::unordered_map<std::string, Block> BlockRegistry::blocks;
+std::unordered_map<ResourceLocation, Block> BlockRegistry::blocks;
 
 void BlockRegistry::registerBlock(const ResourceLocation &location,
                                   const Block &block) {

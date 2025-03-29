@@ -7,13 +7,13 @@
 namespace MCPSP {
 
 class BlockRegistry {
-  static std::unordered_map<std::string, Block> blocks;
+  static std::unordered_map<ResourceLocation, Block> blocks;
 
 public:
   static void registerBlock(const ResourceLocation &location,
                             const Block &block);
   static const Block &getBlock(const ResourceLocation &location);
-  static const std::unordered_map<std::string, Block> &getBlocks() {
+  static const std::unordered_map<ResourceLocation, Block> &getBlocks() {
     return blocks;
   }
 };
